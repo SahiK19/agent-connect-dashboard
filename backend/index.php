@@ -1,4 +1,5 @@
 <?php
+// Hybrid IDS Backend API
 require_once __DIR__ . '/config/config.php';
 
 header('Content-Type: application/json');
