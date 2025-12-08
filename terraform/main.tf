@@ -384,7 +384,7 @@ resource "aws_instance" "backend" {
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
-              yum install -y docker amazon-ssm-agent
+              yum install -y docker amazon-ssm-agent mariadb105
               systemctl start docker
               systemctl enable docker
               systemctl start amazon-ssm-agent

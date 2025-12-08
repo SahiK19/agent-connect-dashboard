@@ -9,5 +9,8 @@ terraform/terraform.tfvars
 backend/vendor/
 backend/.env
 
+# Frontend
+frontend/.env
+
 # Logs
 *.log

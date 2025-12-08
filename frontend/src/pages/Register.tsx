@@ -22,7 +22,7 @@ export default function Register() {
     confirmPassword: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (formData.password !== formData.confirmPassword) {
@@ -34,15 +34,37 @@ export default function Register() {
       return;
     }
 
-    // Simulate API key generation
-    const generatedKey = `sw_${crypto.randomUUID().replace(/-/g, "").slice(0, 32)}`;
-    setApiKey(generatedKey);
-    setIsRegistered(true);
-    
-    toast({
-      title: "Registration successful!",
-      description: "Your account has been created.",
-    });
+    try {
+      const response = await fetch('http://13.214.163.207/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      setApiKey(data.user.api_token);
+      setIsRegistered(true);
+      
+      toast({
+        title: "Registration successful!",
+        description: "Your account has been created.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Registration failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const copyApiKey = () => {

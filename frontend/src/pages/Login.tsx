@@ -22,16 +22,39 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch('http://13.214.163.207/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.email,
+          password: formData.password
+        })
+      });
 
-    toast({
-      title: "Welcome back!",
-      description: "You have been logged in successfully.",
-    });
+      const data = await response.json();
 
-    navigate("/dashboard");
-    setIsLoading(false);
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      toast({
+        title: "Welcome back!",
+        description: "You have been logged in successfully.",
+      });
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Login failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
