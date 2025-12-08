@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { LogsTable } from "@/components/dashboard/LogsTable";
+import { HidsAnalytics } from "@/components/dashboard/HidsAnalytics";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -113,6 +114,9 @@ export default function HidsLogs() {
             </Button>
           </div>
         </div>
+
+        {/* Analytics Section */}
+        <HidsAnalytics />
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl border border-border bg-card">
