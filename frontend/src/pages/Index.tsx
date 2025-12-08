@@ -1,27 +1,39 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Shield, Activity, Lock, Zap, ChevronRight, Server, Eye } from "lucide-react";
+import {
+  Shield,
+  Activity,
+  Lock,
+  Zap,
+  ChevronRight,
+  Server,
+  Eye,
+} from "lucide-react";
 
 const features = [
   {
     icon: Shield,
     title: "Network Intrusion Detection",
-    description: "Real-time monitoring of network traffic to detect and alert on suspicious activities and potential threats.",
+    description:
+      "Real-time monitoring of network traffic to detect and alert on suspicious activities and potential threats.",
   },
   {
     icon: Server,
     title: "Host-based Detection",
-    description: "Monitor system logs, file integrity, and process activities to identify compromised hosts.",
+    description:
+      "Monitor system logs, file integrity, and process activities to identify compromised hosts.",
   },
   {
     icon: Activity,
     title: "Real-time Analytics",
-    description: "Comprehensive dashboards with live statistics, threat distribution, and historical trends.",
+    description:
+      "Comprehensive dashboards with live statistics, threat distribution, and historical trends.",
   },
   {
     icon: Lock,
     title: "Secure API Integration",
-    description: "Unique API tokens for each user ensure secure communication between agents and the platform.",
+    description:
+      "Unique API tokens for each user ensure secure communication between agents and the platform.",
   },
 ];
 
@@ -36,7 +48,9 @@ export default function Index() {
               <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center glow-primary">
                 <Shield className="w-6 h-6 text-primary" />
               </div>
-              <span className="text-xl font-bold text-foreground">SecureWatch</span>
+              <span className="text-xl font-bold text-foreground">
+                Hybrid IDS
+              </span>
             </div>
             <div className="flex items-center gap-4">
               <Link to="/login">
@@ -54,25 +68,37 @@ export default function Index() {
       <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-50" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
-        
+
         <div className="relative max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-secondary/50 mb-8 animate-fade-in">
               <Zap className="w-4 h-4 text-primary" />
-              <span className="text-sm text-muted-foreground">Enterprise-grade security monitoring</span>
+              <span className="text-sm text-muted-foreground">
+                Enterprise-grade security monitoring
+              </span>
             </div>
-            
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+
+            <h1
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 animate-fade-in"
+              style={{ animationDelay: "0.1s" }}
+            >
               Protect Your Infrastructure with{" "}
               <span className="text-gradient">Intelligent Detection</span>
             </h1>
-            
-            <p className="text-lg text-muted-foreground mb-10 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              Deploy our lightweight agents to monitor network traffic and host activities. 
-              Get real-time alerts and comprehensive analytics to stay ahead of threats.
+
+            <p
+              className="text-lg text-muted-foreground mb-10 animate-fade-in"
+              style={{ animationDelay: "0.2s" }}
+            >
+              Deploy our lightweight agents to monitor network traffic and host
+              activities. Get real-time alerts and comprehensive analytics to
+              stay ahead of threats.
             </p>
-            
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+
+            <div
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in"
+              style={{ animationDelay: "0.3s" }}
+            >
               <Link to="/register">
                 <Button variant="hero" size="xl">
                   Start Free Trial
@@ -88,7 +114,10 @@ export default function Index() {
           </div>
 
           {/* Dashboard Preview */}
-          <div className="mt-20 relative animate-fade-in" style={{ animationDelay: "0.4s" }}>
+          <div
+            className="mt-20 relative animate-fade-in"
+            style={{ animationDelay: "0.4s" }}
+          >
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none" />
             <div className="rounded-xl border border-border bg-card/50 backdrop-blur-xl p-2 shadow-2xl">
               <div className="rounded-lg bg-secondary/30 p-6">
@@ -100,19 +129,32 @@ export default function Index() {
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   {[
                     { label: "Total Logs", value: "12,847", color: "primary" },
-                    { label: "Threats Blocked", value: "234", color: "destructive" },
+                    {
+                      label: "Threats Blocked",
+                      value: "234",
+                      color: "destructive",
+                    },
                     { label: "Agents Online", value: "8/8", color: "success" },
                   ].map((stat) => (
-                    <div key={stat.label} className="rounded-lg border border-border bg-card p-4">
-                      <p className="text-sm text-muted-foreground">{stat.label}</p>
-                      <p className={`text-2xl font-bold text-${stat.color}`}>{stat.value}</p>
+                    <div
+                      key={stat.label}
+                      className="rounded-lg border border-border bg-card p-4"
+                    >
+                      <p className="text-sm text-muted-foreground">
+                        {stat.label}
+                      </p>
+                      <p className={`text-2xl font-bold text-${stat.color}`}>
+                        {stat.value}
+                      </p>
                     </div>
                   ))}
                 </div>
                 <div className="h-32 rounded-lg border border-border bg-card flex items-center justify-center">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Eye className="w-5 h-5" />
-                    <span className="text-sm">Live monitoring dashboard preview</span>
+                    <span className="text-sm">
+                      Live monitoring dashboard preview
+                    </span>
                   </div>
                 </div>
               </div>
@@ -129,7 +171,8 @@ export default function Index() {
               Comprehensive Security Monitoring
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to detect, analyze, and respond to security threats in your infrastructure.
+              Everything you need to detect, analyze, and respond to security
+              threats in your infrastructure.
             </p>
           </div>
 
@@ -148,7 +191,9 @@ export default function Index() {
                     <h3 className="text-lg font-semibold text-foreground mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <p className="text-muted-foreground">
+                      {feature.description}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -167,7 +212,8 @@ export default function Index() {
                 Ready to Secure Your Infrastructure?
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Get started in minutes with our easy-to-deploy agents and intuitive dashboard.
+                Get started in minutes with our easy-to-deploy agents and
+                intuitive dashboard.
               </p>
               <Link to="/register">
                 <Button variant="hero" size="xl">
