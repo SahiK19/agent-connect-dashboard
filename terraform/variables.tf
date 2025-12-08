@@ -49,7 +49,7 @@ variable "ec2_instance_type" {
 variable "db_name" {
   description = "Database name"
   type        = string
-  default     = "hybrid-ids-db"
+  default     = "hybrididsdb"
 }
 
 variable "db_username" {
