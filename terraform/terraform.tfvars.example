@@ -1,12 +1,13 @@
-# Example terraform.tfvars file
-# Copy this to terraform.tfvars and update with your values
-
-aws_region         = "ap-southeast-1"
-project_name       = "hybrid-ids"
-ec2_instance_type  = "t3.micro"
-ec2_ami            = "ami-0c02fb55b34c3f4f5"
-db_instance_class  = "db.t3.micro"
-
-# Use existing VPC (set to true if you hit VPC limit)
-use_existing_vpc   = true
-existing_vpc_id    = "vpc-xxxxxxxxxxxxxxxxx"
+aws_region            = "ap-southeast-1"
+project_name          = "hybrid-ids"
+vpc_cidr              = "10.0.0.0/16"
+public_subnet_cidrs   = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs  = ["10.0.10.0/24", "10.0.11.0/24"]
+availability_zones    = ["ap-southeast-1a", "ap-southeast-1b"]
+frontend_bucket_name  = "hybrid-ids-frontend"
+ec2_instance_type     = "t3.micro"
+db_name               = "hybrid-ids-db"
+db_username           = "admin"
+rds_instance_class    = "db.t3.micro"
+rds_allocated_storage = 20
+rds_engine_version    = "8.0"

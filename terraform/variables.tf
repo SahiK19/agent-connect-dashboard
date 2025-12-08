@@ -10,32 +10,68 @@ variable "project_name" {
   default     = "hybrid-ids"
 }
 
+variable "vpc_cidr" {
+  description = "VPC CIDR block"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "public_subnet_cidrs" {
+  description = "Public subnet CIDR blocks"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
+variable "private_subnet_cidrs" {
+  description = "Private subnet CIDR blocks"
+  type        = list(string)
+  default     = ["10.0.10.0/24", "10.0.11.0/24"]
+}
+
+variable "availability_zones" {
+  description = "Availability zones"
+  type        = list(string)
+  default     = ["ap-southeast-1a", "ap-southeast-1b"]
+}
+
+variable "frontend_bucket_name" {
+  description = "S3 bucket name for frontend"
+  type        = string
+  default     = "hybrid-ids-frontend"
+}
+
 variable "ec2_instance_type" {
   description = "EC2 instance type"
   type        = string
   default     = "t3.micro"
 }
 
-variable "ec2_ami" {
-  description = "EC2 AMI ID (Amazon Linux 2023)"
+variable "db_name" {
+  description = "Database name"
   type        = string
-  default     = "ami-047126e50991d067b"
+  default     = "hybrid-ids-db"
 }
 
-variable "db_instance_class" {
+variable "db_username" {
+  description = "Database username"
+  type        = string
+  default     = "admin"
+}
+
+variable "rds_instance_class" {
   description = "RDS instance class"
   type        = string
   default     = "db.t3.micro"
 }
 
-variable "use_existing_vpc" {
-  description = "Use existing VPC instead of creating new one"
-  type        = bool
-  default     = false
+variable "rds_allocated_storage" {
+  description = "RDS allocated storage in GB"
+  type        = number
+  default     = 20
 }
 
-variable "existing_vpc_id" {
-  description = "Existing VPC ID (required if use_existing_vpc is true)"
+variable "rds_engine_version" {
+  description = "MySQL engine version"
   type        = string
-  default     = ""
+  default     = "8.0"
 }
