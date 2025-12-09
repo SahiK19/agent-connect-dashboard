@@ -62,8 +62,18 @@ resource "aws_instance" "backend" {
     Name    = "${var.project_name}-backend"
     Project = var.project_name
   }
+}
 
-  lifecycle {
-    ignore_changes = [ami]
+resource "aws_eip" "backend" {
+  domain = "vpc"
+
+  tags = {
+    Name    = "${var.project_name}-backend-eip"
+    Project = var.project_name
   }
+}
+
+resource "aws_eip_association" "backend" {
+  instance_id   = aws_instance.backend.id
+  allocation_id = aws_eip.backend.id
 }

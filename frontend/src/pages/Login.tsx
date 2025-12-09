@@ -23,7 +23,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://13.214.163.207/api/login', {
+      const response = await fetch('http://18.142.200.244/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
