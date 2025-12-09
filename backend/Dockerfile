@@ -23,7 +23,7 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN a2enmod rewrite
+RUN a2enmod rewrite headers
 
 RUN chown -R www-data:www-data /var/www/html
 
