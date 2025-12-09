@@ -1,9 +1,15 @@
 #!/bin/bash
-yum update -y
-yum install -y docker
+apt-get update -y
+apt-get install -y docker.io mysql-client unzip curl
 systemctl start docker
 systemctl enable docker
-usermod -a -G docker ec2-user
+usermod -a -G docker ubuntu
+
+# Install AWS CLI v2
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
+rm -rf aws awscliv2.zip
 
 aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${ecr_repository_url}
 
