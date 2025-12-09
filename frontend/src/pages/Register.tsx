@@ -48,7 +48,12 @@ export default function Register() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.error || data.message || 'Registration failed');
+      }
+
+      if (!data.user || !data.user.api_token) {
+        console.error('Invalid response:', data);
+        throw new Error('Invalid response from server');
       }
 
       setApiKey(data.user.api_token);
