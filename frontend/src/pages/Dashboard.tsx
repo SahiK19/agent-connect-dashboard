@@ -1,9 +1,16 @@
+// Dashboard
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ActivityChart } from "@/components/dashboard/ActivityChart";
 import { ThreatDistribution } from "@/components/dashboard/ThreatDistribution";
 import { LogsTable } from "@/components/dashboard/LogsTable";
-import { Shield, AlertTriangle, Activity, Server, CheckCircle } from "lucide-react";
+import {
+  Shield,
+  AlertTriangle,
+  Activity,
+  Server,
+  CheckCircle,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -57,9 +64,12 @@ export default function Dashboard() {
             <div className="w-20 h-20 rounded-2xl bg-warning/20 flex items-center justify-center mx-auto mb-6 glow-warning">
               <AlertTriangle className="w-10 h-10 text-warning" />
             </div>
-            <h2 className="text-2xl font-bold text-foreground mb-3">Agent Not Connected</h2>
+            <h2 className="text-2xl font-bold text-foreground mb-3">
+              Agent Not Connected
+            </h2>
             <p className="text-muted-foreground mb-6">
-              To view analytics and logs, you need to install and connect the SecureWatch agent to your infrastructure.
+              To view analytics and logs, you need to install and connect the
+              SecureWatch agent to your infrastructure.
             </p>
             <Link to="/install-agent">
               <Button variant="hero" size="lg">
@@ -79,11 +89,15 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, John. Here's your security overview.</p>
+            <p className="text-muted-foreground">
+              Welcome back, John. Here's your security overview.
+            </p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-success/30 bg-success/10">
             <CheckCircle className="w-4 h-4 text-success" />
-            <span className="text-sm font-medium text-success">Agent Connected</span>
+            <span className="text-sm font-medium text-success">
+              Agent Connected
+            </span>
           </div>
         </div>
 
@@ -134,7 +148,9 @@ export default function Dashboard() {
         {/* Recent Logs */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
+            <h2 className="text-lg font-semibold text-foreground">
+              Recent Activity
+            </h2>
             <Link to="/nids-logs">
               <Button variant="ghost" size="sm">
                 View All
