@@ -62,4 +62,8 @@ resource "aws_instance" "backend" {
     Name    = "${var.project_name}-backend"
     Project = var.project_name
   }
+
+  lifecycle {
+    ignore_changes = [ami]
+  }
 }
