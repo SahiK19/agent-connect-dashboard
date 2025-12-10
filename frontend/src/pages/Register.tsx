@@ -4,15 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Eye, EyeOff, Copy, Check, ArrowLeft } from "lucide-react";
+import { Shield, Eye, EyeOff, Check, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [apiKey, setApiKey] = useState("");
-  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -51,12 +49,7 @@ export default function Register() {
         throw new Error(data.error || data.message || 'Registration failed');
       }
 
-      if (!data.user || !data.user.api_token) {
-        console.error('Invalid response:', data);
-        throw new Error('Invalid response from server');
-      }
-
-      setApiKey(data.user.api_token);
+      localStorage.setItem('user', JSON.stringify(data.user));
       setIsRegistered(true);
       
       toast({
@@ -72,16 +65,6 @@ export default function Register() {
     }
   };
 
-  const copyApiKey = () => {
-    navigator.clipboard.writeText(apiKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    toast({
-      title: "API Key copied",
-      description: "Your API key has been copied to clipboard.",
-    });
-  };
-
   if (isRegistered) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -95,53 +78,24 @@ export default function Register() {
             </div>
             <CardTitle className="text-2xl">Registration Complete!</CardTitle>
             <CardDescription>
-              Save your API key below. You'll need it to configure the agent.
+              Your account has been created successfully.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label>Your API Key</Label>
-              <div className="flex gap-2">
-                <div className="flex-1 px-4 py-3 rounded-lg border border-border bg-secondary/50 font-mono text-sm break-all">
-                  {apiKey}
-                </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={copyApiKey}
-                  className="shrink-0"
-                >
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                ⚠️ Store this key securely. You won't be able to see it again.
-              </p>
-            </div>
-
             <div className="rounded-lg border border-border bg-secondary/30 p-4">
               <h4 className="font-medium text-foreground mb-2">Next Steps:</h4>
               <ol className="text-sm text-muted-foreground space-y-2">
-                <li>1. Download and install the SecureWatch agent</li>
-                <li>2. Configure the agent with your API key</li>
-                <li>3. Start monitoring your infrastructure</li>
+                <li>1. Log in to your account</li>
+                <li>2. Get your API token from the dashboard</li>
+                <li>3. Download and install the SecureWatch agent</li>
               </ol>
             </div>
 
-            <div className="flex gap-3">
-              <Button 
-                variant="hero" 
-                className="flex-1"
-                onClick={() => window.open(`http://18.142.200.244/api/download-agent?token=${apiKey}`, '_blank')}
-              >
-                Download Agent
+            <Link to="/login" className="block">
+              <Button variant="hero" className="w-full">
+                Go to Login
               </Button>
-              <Link to="/login" className="flex-1">
-                <Button variant="outline" className="w-full">
-                  Go to Login
-                </Button>
-              </Link>
-            </div>
+            </Link>
           </CardContent>
         </Card>
       </div>

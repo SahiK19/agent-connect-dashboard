@@ -6,6 +6,7 @@ import {
   Server,
   Download,
   Activity,
+  Key,
   LogOut,
   Menu,
   X,
@@ -19,6 +20,7 @@ const navItems = [
   { icon: Server, label: "HIDS Logs", path: "/hids-logs" },
   { icon: Download, label: "Install Agent", path: "/install-agent" },
   { icon: Activity, label: "Agent Status", path: "/agent-status" },
+  { icon: Key, label: "API Token", path: "/api-token" },
 ];
 
 export function Sidebar() {

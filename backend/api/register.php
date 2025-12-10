@@ -58,8 +58,7 @@ try {
         'user' => [
             'id' => $conn->lastInsertId(),
             'username' => $username,
-            'email' => $email,
-            'api_token' => $apiToken
+            'email' => $email
         ]
     ]);
     

@@ -40,8 +40,7 @@ try {
         'user' => [
             'id' => $user['id'],
             'username' => $user['username'],
-            'email' => $user['email'],
-            'api_token' => $user['api_token']
+            'email' => $user['email']
         ]
     ]);
     
