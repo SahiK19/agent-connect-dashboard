@@ -44,3 +44,13 @@ output "github_actions_secret_access_key" {
   value       = module.iam.github_actions_secret_access_key
   sensitive   = true
 }
+
+output "wazuh_instance_id" {
+  description = "Wazuh Manager EC2 instance ID"
+  value       = module.ec2.wazuh_instance_id
+}
+
+output "wazuh_public_ip" {
+  description = "Wazuh Manager Elastic IP"
+  value       = module.ec2.wazuh_public_ip
+}
