@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Eye, EyeOff, Check, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -49,7 +51,7 @@ export default function Register() {
         throw new Error(data.error || data.message || 'Registration failed');
       }
 
-      localStorage.setItem('user', JSON.stringify(data.user));
+      login(data.user);
       setIsRegistered(true);
       
       toast({

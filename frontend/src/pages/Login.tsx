@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/lib/auth";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -38,7 +40,7 @@ export default function Login() {
         throw new Error(data.error || 'Login failed');
       }
 
-      localStorage.setItem('user', JSON.stringify(data.user));
+      login(data.user);
 
       toast({
         title: "Welcome back!",
