@@ -1,5 +1,5 @@
 <?php
-// config.php fileee
+// config.php fileeee
 define('APP_NAME', 'Hybrid IDS');
 define('APP_ENV', getenv('APP_ENV') ?: 'production');
 define('AWS_REGION', getenv('AWS_REGION') ?: 'us-east-1');
