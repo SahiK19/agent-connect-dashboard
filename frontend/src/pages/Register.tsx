@@ -129,11 +129,13 @@ export default function Register() {
             </div>
 
             <div className="flex gap-3">
-              <Link to="/install-agent" className="flex-1">
-                <Button variant="hero" className="w-full">
-                  Install Agent
-                </Button>
-              </Link>
+              <Button 
+                variant="hero" 
+                className="flex-1"
+                onClick={() => window.open(`http://18.142.200.244/api/download-agent?token=${apiKey}`, '_blank')}
+              >
+                Download Agent
+              </Button>
               <Link to="/login" className="flex-1">
                 <Button variant="outline" className="w-full">
                   Go to Login
