@@ -7,7 +7,10 @@ RewriteEngine On
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
 
+# Handle API routes first
+RewriteRule ^api/(.*)$ api/$1.php [QSA,L]
+
+# Handle other routes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^api/(.*)$ api/$1.php [QSA,L]
 RewriteRule ^(.*)$ index.php [QSA,L]
