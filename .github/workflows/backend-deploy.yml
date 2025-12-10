@@ -43,8 +43,24 @@ jobs:
         env:
           EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
         run: |
-          aws ssm send-command \
+          COMMAND_ID=$(aws ssm send-command \
             --instance-ids $EC2_INSTANCE_ID \
             --document-name "AWS-RunShellScript" \
             --parameters 'commands=["sudo /usr/local/bin/deploy-backend.sh"]' \
+            --region ap-southeast-1 \
+            --query 'Command.CommandId' \
+            --output text)
+          
+          echo "Waiting for deployment to complete..."
+          aws ssm wait command-executed \
+            --command-id $COMMAND_ID \
+            --instance-id $EC2_INSTANCE_ID \
             --region ap-southeast-1
+          
+          echo "Deployment output:"
+          aws ssm get-command-invocation \
+            --command-id $COMMAND_ID \
+            --instance-id $EC2_INSTANCE_ID \
+            --region ap-southeast-1 \
+            --query 'StandardOutputContent' \
+            --output text

@@ -15,6 +15,7 @@ aws ecr get-login-password --region ${aws_region} | docker login --username AWS 
 
 docker pull ${ecr_repository_url}:latest
 docker run -d -p 80:80 \
+  --restart unless-stopped \
   -e AWS_REGION=${aws_region} \
   -e DB_SECRET_NAME=${secret_name} \
   -e APP_ENV=production \
@@ -48,6 +49,7 @@ docker stop backend 2>/dev/null || true
 docker rm backend 2>/dev/null || true
 
 docker run -d -p 80:80 \
+  --restart unless-stopped \
   -e AWS_REGION=$AWS_REGION \
   -e DB_SECRET_NAME=$DB_SECRET_NAME \
   -e APP_ENV=production \
