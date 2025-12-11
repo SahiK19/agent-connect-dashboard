@@ -2,182 +2,189 @@ import { useState } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, Terminal, Copy, Check, Monitor, Server } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Terminal, Copy, Check, Monitor, Server } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const installSteps = [
-  {
-    title: "Download the Agent",
-    description: "Choose the appropriate agent for your operating system.",
-    content: (
-      <div className="grid sm:grid-cols-2 gap-4">
-        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-          <Monitor className="w-6 h-6" />
-          <span className="font-medium">Linux Agent</span>
-          <span className="text-xs text-muted-foreground">x64, ARM64</span>
-        </Button>
-        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
-          <Server className="w-6 h-6" />
-          <span className="font-medium">Windows Agent</span>
-          <span className="text-xs text-muted-foreground">x64</span>
-        </Button>
-      </div>
-    ),
+type PackageType = 'rpm-amd64' | 'rpm-aarch64' | 'deb-amd64' | 'deb-aarch64';
+
+const packageOptions = {
+  'rpm-amd64': {
+    name: 'RPM (x86_64)',
+    command: (manager: string, agentName: string) => 
+      `curl -o wazuh-agent-4.14.1-1.x86_64.rpm https://packages.wazuh.com/4.x/yum/wazuh-agent-4.14.1-1.x86_64.rpm && sudo WAZUH_MANAGER='${manager}' WAZUH_AGENT_NAME='${agentName}' rpm -ihv wazuh-agent-4.14.1-1.x86_64.rpm`
   },
-  {
-    title: "Install the Agent",
-    description: "Run the installation command on your system.",
-    code: {
-      linux: "curl -sSL https://securewatch.io/install.sh | sudo bash",
-      windows: "powershell -Command \"irm https://securewatch.io/install.ps1 | iex\"",
-    },
+  'rpm-aarch64': {
+    name: 'RPM (aarch64)',
+    command: (manager: string, agentName: string) => 
+      `curl -o wazuh-agent-4.14.1-1.aarch64.rpm https://packages.wazuh.com/4.x/yum/wazuh-agent-4.14.1-1.aarch64.rpm && sudo WAZUH_MANAGER='${manager}' WAZUH_AGENT_NAME='${agentName}' rpm -ihv wazuh-agent-4.14.1-1.aarch64.rpm`
   },
-  {
-    title: "Configure with API Key",
-    description: "Enter your API key to link the agent to your account.",
-    code: {
-      linux: "sudo securewatch config --token YOUR_API_KEY",
-      windows: "securewatch.exe config --token YOUR_API_KEY",
-    },
+  'deb-amd64': {
+    name: 'DEB (amd64)',
+    command: (manager: string, agentName: string) => 
+      `wget https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.14.1-1_amd64.deb && sudo WAZUH_MANAGER='${manager}' WAZUH_AGENT_NAME='${agentName}' dpkg -i ./wazuh-agent_4.14.1-1_amd64.deb`
   },
-  {
-    title: "Start the Agent",
-    description: "Start the agent to begin monitoring.",
-    code: {
-      linux: "sudo systemctl start securewatch",
-      windows: "net start SecureWatchAgent",
-    },
-  },
-];
+  'deb-aarch64': {
+    name: 'DEB (arm64)',
+    command: (manager: string, agentName: string) => 
+      `wget https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.14.1-1_arm64.deb && sudo WAZUH_MANAGER='${manager}' WAZUH_AGENT_NAME='${agentName}' dpkg -i ./wazuh-agent_4.14.1-1_arm64.deb`
+  }
+};
+
+const startCommands = `sudo systemctl daemon-reload
+sudo systemctl enable wazuh-agent
+sudo systemctl start wazuh-agent`;
 
 export default function InstallAgent() {
-  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
-  const [selectedOs, setSelectedOs] = useState<"linux" | "windows">("linux");
+  const [copiedStep, setCopiedStep] = useState<string | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<PackageType>('deb-amd64');
+  const [agentName, setAgentName] = useState('');
+  const [wazuhManager] = useState('47.130.204.203');
   const { toast } = useToast();
 
-  const copyToClipboard = (text: string, index: number) => {
+  const copyToClipboard = (text: string, step: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedIndex(index);
-    setTimeout(() => setCopiedIndex(null), 2000);
+    setCopiedStep(step);
+    setTimeout(() => setCopiedStep(null), 2000);
     toast({
       title: "Copied to clipboard",
       description: "Command has been copied.",
     });
   };
 
+  const installCommand = packageOptions[selectedPackage].command(wazuhManager, agentName || 'wazuh-agent');
+
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Install Agent</h1>
+          <h1 className="text-2xl font-bold text-foreground">Install Wazuh Agent</h1>
           <p className="text-muted-foreground">
-            Follow these steps to install and configure the SecureWatch agent.
+            Configure and install the Wazuh agent on your systems.
           </p>
         </div>
 
-        {/* OS Toggle */}
-        <div className="flex gap-2 p-1 rounded-lg border border-border bg-secondary/30 w-fit">
-          <Button
-            variant={selectedOs === "linux" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setSelectedOs("linux")}
-          >
-            <Terminal className="w-4 h-4 mr-2" />
-            Linux
-          </Button>
-          <Button
-            variant={selectedOs === "windows" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setSelectedOs("windows")}
-          >
-            <Monitor className="w-4 h-4 mr-2" />
-            Windows
-          </Button>
-        </div>
-
-        {/* Installation Steps */}
-        <div className="space-y-4">
-          {installSteps.map((step, index) => (
-            <Card key={index} className="relative overflow-hidden">
-              <div className="absolute top-6 left-6 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                {index + 1}
-              </div>
-              <CardHeader className="pl-20">
-                <CardTitle className="text-lg">{step.title}</CardTitle>
-                <CardDescription>{step.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="pl-20">
-                {step.content}
-                {step.code && (
-                  <div className="relative group">
-                    <pre className="p-4 rounded-lg bg-secondary/50 border border-border font-mono text-sm overflow-x-auto">
-                      <code className="text-foreground">
-                        {step.code[selectedOs]}
-                      </code>
-                    </pre>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => copyToClipboard(step.code![selectedOs], index)}
-                    >
-                      {copiedIndex === index ? (
-                        <Check className="w-4 h-4 text-success" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* API Key Input */}
-        <Card className="border-primary/30">
+        {/* Configuration */}
+        <Card>
           <CardHeader>
-            <CardTitle>Your API Key</CardTitle>
+            <CardTitle>Agent Configuration</CardTitle>
             <CardDescription>
-              If you've lost your API key, you can generate a new one from your account settings.
+              Select your package type and configure the agent name.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex gap-3">
-              <Input
-                placeholder="Enter your API key (e.g., sw_abc123...)"
-                className="font-mono"
-              />
-              <Button variant="hero">
-                Verify Key
-              </Button>
+          <CardContent className="space-y-4">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="package">Package Type</Label>
+                <Select value={selectedPackage} onValueChange={(value: PackageType) => setSelectedPackage(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(packageOptions).map(([key, option]) => (
+                      <SelectItem key={key} value={key}>
+                        {option.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="agentName">Agent Name</Label>
+                <Input
+                  id="agentName"
+                  placeholder="e.g., web-server-01"
+                  value={agentName}
+                  onChange={(e) => setAgentName(e.target.value)}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* Help Section */}
-        <Card className="bg-secondary/30">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-                <Terminal className="w-5 h-5 text-primary" />
+        {/* Installation Steps */}
+        <div className="space-y-4">
+          {/* Step 1: Install Agent */}
+          <Card>
+            <div className="absolute top-6 left-6 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+              1
+            </div>
+            <CardHeader className="pl-20">
+              <CardTitle>Install Wazuh Agent</CardTitle>
+              <CardDescription>
+                Run this command to download and install the Wazuh agent.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pl-20">
+              <div className="relative group">
+                <pre className="p-4 rounded-lg bg-secondary/50 border border-border font-mono text-sm overflow-x-auto">
+                  <code className="text-foreground">{installCommand}</code>
+                </pre>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => copyToClipboard(installCommand, 'install')}
+                >
+                  {copiedStep === 'install' ? (
+                    <Check className="w-4 h-4 text-success" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
               </div>
-              <div>
-                <h3 className="font-semibold text-foreground mb-1">Need Help?</h3>
-                <p className="text-sm text-muted-foreground">
-                  If you encounter any issues during installation, check our{" "}
-                  <a href="#" className="text-primary hover:underline">
-                    documentation
-                  </a>{" "}
-                  or contact our{" "}
-                  <a href="#" className="text-primary hover:underline">
-                    support team
-                  </a>
-                  .
-                </p>
+            </CardContent>
+          </Card>
+
+          {/* Step 2: Start Agent */}
+          <Card>
+            <div className="absolute top-6 left-6 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+              2
+            </div>
+            <CardHeader className="pl-20">
+              <CardTitle>Start Wazuh Agent</CardTitle>
+              <CardDescription>
+                Enable and start the Wazuh agent service.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pl-20">
+              <div className="relative group">
+                <pre className="p-4 rounded-lg bg-secondary/50 border border-border font-mono text-sm overflow-x-auto">
+                  <code className="text-foreground">{startCommands}</code>
+                </pre>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => copyToClipboard(startCommands, 'start')}
+                >
+                  {copiedStep === 'start' ? (
+                    <Check className="w-4 h-4 text-success" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
+                </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Manager Info */}
+        <Card className="border-warning/30">
+          <CardHeader>
+            <CardTitle>Wazuh Manager Configuration</CardTitle>
+            <CardDescription>
+              Your agents will connect to the Wazuh manager at this IP address.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="p-4 rounded-lg bg-success/10 border border-success/30">
+              <p className="text-sm">
+                <strong>Manager IP:</strong> <code className="px-2 py-1 rounded bg-secondary">47.130.204.203</code>
+              </p>
             </div>
           </CardContent>
         </Card>
