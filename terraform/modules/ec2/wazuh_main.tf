@@ -11,6 +11,14 @@ resource "aws_security_group" "wazuh" {
     description = "HTTP server for alerts.json"
   }
 
+  ingress {
+    from_port   = 5601
+    to_port     = 5601
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Wazuh dashboard access"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -41,7 +49,7 @@ data "aws_ami" "ubuntu_wazuh" {
 
 resource "aws_instance" "wazuh" {
   ami                    = data.aws_ami.ubuntu_wazuh.id
-  instance_type          = "t3.small"
+  instance_type          = "c7i-flex.large"
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [aws_security_group.wazuh.id]
   iam_instance_profile   = var.iam_instance_profile
