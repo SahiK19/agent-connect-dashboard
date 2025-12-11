@@ -51,6 +51,22 @@ resource "aws_security_group" "wazuh" {
     description = "Wazuh agent communication"
   }
 
+  ingress {
+    from_port   = 1515
+    to_port     = 1515
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Wazuh agent enrollment"
+  }
+
+  ingress {
+    from_port   = 151
+    to_port     = 151
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Custom service port 151"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
