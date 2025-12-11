@@ -35,6 +35,22 @@ resource "aws_security_group" "wazuh" {
     description = "HTTPS access"
   }
 
+  ingress {
+    from_port   = -1
+    to_port     = -1
+    protocol    = "icmp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "ICMP (ping)"
+  }
+
+  ingress {
+    from_port   = 1514
+    to_port     = 1514
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Wazuh agent communication"
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
