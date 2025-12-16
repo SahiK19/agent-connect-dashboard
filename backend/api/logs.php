@@ -17,14 +17,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit();
 }
 
-$logType = $_GET['type'] ?? 'all';
-$limit = min((int)($_GET['limit'] ?? 100), 1000);
+$limit = min((int)($_GET['limit'] ?? 50), 1000);
 
 try {
-    // Fetch logs from all sources
-    $wazuhLogs = fetchWazuhLogs($limit);
-    $snortLogs = fetchSnortLogs($limit);
-    $correlationLogs = fetchCorrelationLogs($limit);
+    $database = new Database();
+    $pdo = $database->getConnection();
+    
+    // Fetch from database tables
+    $wazuhLogs = fetchStoredWazuhLogs($pdo, $limit);
+    $snortLogs = fetchStoredSnortLogs($pdo, $limit);
+    $correlationLogs = fetchStoredCorrelationLogs($pdo, $limit);
     
     $response = [
         'wazuh_logs' => $wazuhLogs,
@@ -40,90 +42,26 @@ try {
     http_response_code(500);
     echo json_encode([
         'error' => 'Failed to fetch logs',
-        'message' => APP_ENV === 'development' ? $e->getMessage() : 'Internal server error'
+        'message' => $e->getMessage()
     ]);
 }
 
-function fetchWazuhLogs($limit) {
-    $wazuhManagerUrl = 'http://47.130.204.203:8000/alerts.json';
-    
-    $context = stream_context_create([
-        'http' => [
-            'timeout' => 10,
-            'method' => 'GET'
-        ]
-    ]);
-    
-    $alertsData = @file_get_contents($wazuhManagerUrl, false, $context);
-    
-    if ($alertsData === false) {
-        return [];
-    }
-    
-    $lines = explode("\n", trim($alertsData));
-    $alerts = [];
-    
-    foreach (array_slice($lines, -$limit) as $line) {
-        if (empty(trim($line))) continue;
-        
-        $alert = json_decode($line, true);
-        if ($alert) {
-            $alerts[] = [
-                'id' => $alert['id'] ?? uniqid(),
-                'timestamp' => $alert['timestamp'] ?? date('c'),
-                'agent_name' => $alert['agent']['name'] ?? 'unknown',
-                'agent_ip' => $alert['agent']['ip'] ?? 'unknown',
-                'rule_level' => $alert['rule']['level'] ?? 0,
-                'rule_description' => $alert['rule']['description'] ?? 'Unknown event',
-                'source_ip' => $alert['data']['srcip'] ?? $alert['agent']['ip'] ?? 'unknown',
-                'dest_ip' => $alert['data']['dstip'] ?? 'unknown',
-                'event_type' => determineEventType($alert),
-                'severity' => determineSeverity($alert['rule']['level'] ?? 0),
-                'description' => $alert['rule']['description'] ?? 'Security event detected',
-                'raw_data' => $alert
-            ];
-        }
-    }
-    
-    return array_reverse($alerts);
+function fetchStoredWazuhLogs($pdo, $limit) {
+    $stmt = $pdo->prepare("SELECT * FROM wazuh_logs ORDER BY timestamp DESC LIMIT ?");
+    $stmt->execute([$limit]);
+    return $stmt->fetchAll();
 }
 
-function fetchSnortLogs($limit) {
-    $testVmUrl = 'http://192.168.100.197:8001/snort-logs?limit=' . $limit;
-    
-    $context = stream_context_create([
-        'http' => [
-            'timeout' => 5,
-            'method' => 'GET'
-        ]
-    ]);
-    
-    $snortData = @file_get_contents($testVmUrl, false, $context);
-    
-    if ($snortData === false) {
-        return [];
-    }
-    
-    return json_decode($snortData, true) ?: [];
+function fetchStoredSnortLogs($pdo, $limit) {
+    $stmt = $pdo->prepare("SELECT * FROM snort_logs ORDER BY timestamp DESC LIMIT ?");
+    $stmt->execute([$limit]);
+    return $stmt->fetchAll();
 }
 
-function fetchCorrelationLogs($limit) {
-    $testVmUrl = 'http://192.168.100.197:8002/correlation-logs?limit=' . $limit;
-    
-    $context = stream_context_create([
-        'http' => [
-            'timeout' => 5,
-            'method' => 'GET'
-        ]
-    ]);
-    
-    $correlationData = @file_get_contents($testVmUrl, false, $context);
-    
-    if ($correlationData === false) {
-        return [];
-    }
-    
-    return json_decode($correlationData, true) ?: [];
+function fetchStoredCorrelationLogs($pdo, $limit) {
+    $stmt = $pdo->prepare("SELECT * FROM correlation_logs ORDER BY timestamp DESC LIMIT ?");
+    $stmt->execute([$limit]);
+    return $stmt->fetchAll();
 }
 
 function determineEventType($alert) {
