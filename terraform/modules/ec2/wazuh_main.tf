@@ -12,6 +12,14 @@ resource "aws_security_group" "wazuh" {
   }
 
   ingress {
+    from_port   = 8001
+    to_port     = 8001
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Custom service port 8001"
+  }
+
+  ingress {
     from_port   = 5601
     to_port     = 5601
     protocol    = "tcp"
@@ -80,23 +88,8 @@ resource "aws_security_group" "wazuh" {
   }
 }
 
-data "aws_ami" "ubuntu_wazuh" {
-  most_recent = true
-  owners      = ["099720109477"] # Canonical
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
 resource "aws_instance" "wazuh" {
-  ami                    = data.aws_ami.ubuntu_wazuh.id
+  ami                    = "ami-0b571a36bf02461b4"
   instance_type          = "c7i-flex.large"
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [aws_security_group.wazuh.id]
