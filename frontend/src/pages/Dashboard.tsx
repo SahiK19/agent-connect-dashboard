@@ -1,60 +1,50 @@
-// Dashboard fileee
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ActivityChart } from "@/components/dashboard/ActivityChart";
 import { ThreatDistribution } from "@/components/dashboard/ThreatDistribution";
 import { LogsTable } from "@/components/dashboard/LogsTable";
+import { useDashboardData } from "@/hooks/use-dashboard-data";
 import {
   Shield,
   AlertTriangle,
   Activity,
   Server,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-const recentLogs = [
-  {
-    id: "1",
-    timestamp: "2024-01-15 14:32:05",
-    sourceIp: "192.168.1.105",
-    destIp: "10.0.0.50",
-    eventType: "Port Scan",
-    severity: "medium" as const,
-    description: "Multiple port connections detected from single source",
-  },
-  {
-    id: "2",
-    timestamp: "2024-01-15 14:28:12",
-    sourceIp: "203.45.67.89",
-    destIp: "10.0.0.25",
-    eventType: "SQL Injection",
-    severity: "critical" as const,
-    description: "Attempted SQL injection in login form",
-  },
-  {
-    id: "3",
-    timestamp: "2024-01-15 14:25:33",
-    sourceIp: "172.16.0.45",
-    destIp: "10.0.0.100",
-    eventType: "Brute Force",
-    severity: "high" as const,
-    description: "Multiple failed SSH login attempts",
-  },
-  {
-    id: "4",
-    timestamp: "2024-01-15 14:20:18",
-    sourceIp: "192.168.1.22",
-    destIp: "10.0.0.75",
-    eventType: "Suspicious Traffic",
-    severity: "low" as const,
-    description: "Unusual outbound traffic pattern detected",
-  },
-];
-
 export default function Dashboard() {
-  const isAgentConnected = true; // This would come from your backend
+  const { stats, recentLogs, isLoading, error, isAgentConnected } = useDashboardData();
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Loading dashboard data...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="text-center max-w-md">
+            <AlertTriangle className="w-12 h-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-bold mb-2">Connection Error</h2>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   if (!isAgentConnected) {
     return (
@@ -105,35 +95,35 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard
             title="Total Logs Today"
-            value="12,847"
-            change="+12% from yesterday"
+            value={stats.totalLogs.toLocaleString()}
+            change={stats.logsChange}
             changeType="positive"
             icon={Activity}
             iconColor="primary"
           />
           <StatsCard
             title="Threats Blocked"
-            value="234"
-            change="-5% from yesterday"
+            value={stats.threatsBlocked.toString()}
+            change={stats.threatsChange}
             changeType="positive"
             icon={Shield}
             iconColor="success"
           />
           <StatsCard
             title="Critical Alerts"
-            value="8"
-            change="+3 new alerts"
-            changeType="negative"
+            value={stats.criticalAlerts.toString()}
+            change={stats.alertsChange}
+            changeType={stats.criticalAlerts > 0 ? "negative" : "positive"}
             icon={AlertTriangle}
             iconColor="destructive"
           />
           <StatsCard
             title="Active Agents"
-            value="8/8"
-            change="All agents online"
-            changeType="positive"
+            value={stats.activeAgents}
+            change={isAgentConnected ? "Agent online" : "Agent offline"}
+            changeType={isAgentConnected ? "positive" : "negative"}
             icon={Server}
-            iconColor="success"
+            iconColor={isAgentConnected ? "success" : "destructive"}
           />
         </div>
 
