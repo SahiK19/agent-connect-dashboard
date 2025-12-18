@@ -87,8 +87,8 @@ export function useDashboardData(): DashboardData {
       try {
         setData(prev => ({ ...prev, isLoading: true, error: null }));
         
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://18.142.200.244';
-        const response = await fetch(`${apiUrl}/api/logs.php?limit=50`);
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://18.142.200.244:8080';
+        const response = await fetch(`${apiUrl}/api/dashboard-logs.php?limit=50`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -97,15 +97,11 @@ export function useDashboardData(): DashboardData {
         const result = await response.json();
         
         // Process logs data
-        const allLogs = [
-          ...(result.wazuh_logs || []),
-          ...(result.snort_logs || []),
-          ...(result.correlation_logs || [])
-        ];
+        const allLogs = result.logs || [];
         
         if (allLogs.length > 0) {
           // Use real data if available
-          const totalLogs = result.total_count || 0;
+          const totalLogs = result.total || 0;
           const criticalAlerts = allLogs.filter(log => log.severity === 'critical').length;
           const highAlerts = allLogs.filter(log => log.severity === 'high').length;
           const threatsBlocked = criticalAlerts + highAlerts;
@@ -113,13 +109,13 @@ export function useDashboardData(): DashboardData {
           const recentLogs: LogEntry[] = allLogs
             .slice(0, 4)
             .map(log => ({
-              id: log.id || Math.random().toString(),
-              timestamp: new Date(log.timestamp).toLocaleString(),
-              sourceIp: log.source_ip || log.sourceIp || 'unknown',
-              destIp: log.dest_ip || log.destIp || 'unknown',
-              eventType: log.event_type || log.eventType || 'Security Event',
-              severity: log.severity as 'low' | 'medium' | 'high' | 'critical',
-              description: log.description || log.rule_description || 'Security event detected'
+              id: log.id?.toString() || Math.random().toString(),
+              timestamp: new Date(log.created_at || log.timestamp).toLocaleString(),
+              sourceIp: 'N/A',
+              destIp: 'N/A', 
+              eventType: log.source || 'Security Event',
+              severity: (log.severity || 'medium') as 'low' | 'medium' | 'high' | 'critical',
+              description: log.message || 'Security event detected'
             }));
 
           setData(prev => ({
