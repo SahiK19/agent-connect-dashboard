@@ -13,7 +13,11 @@ docker pull $ECR_REPO:latest
 
 # Stop and remove old container
 docker stop backend 2>/dev/null || true
-docker rm backend 2>/dev/null || true
+docker rm -f backend 2>/dev/null || true
+
+# Kill any process using port 80
+fuser -k 80/tcp 2>/dev/null || true
+sleep 2
 
 # Run new container with environment variables
 docker run -d -p 80:80 \
@@ -22,5 +26,11 @@ docker run -d -p 80:80 \
   -e DB_SECRET_NAME=$DB_SECRET_NAME \
   -e APP_ENV=production \
   --name backend $ECR_REPO:latest
+
+# Remove old images (keep only latest)
+docker images $ECR_REPO --format "{{.ID}} {{.Tag}}" | grep '<none>' | awk '{print $1}' | xargs -r docker rmi -f 2>/dev/null || true
+
+# Remove dangling images
+docker image prune -f
 
 echo "Backend deployed successfully"
