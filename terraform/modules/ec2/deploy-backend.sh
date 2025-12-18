@@ -17,6 +17,7 @@ docker rm backend 2>/dev/null || true
 
 # Run new container with environment variables
 docker run -d -p 80:80 \
+  --restart unless-stopped \
   -e AWS_REGION=$AWS_REGION \
   -e DB_SECRET_NAME=$DB_SECRET_NAME \
   -e APP_ENV=production \
