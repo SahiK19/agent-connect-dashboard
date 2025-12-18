@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Eye, EyeOff, Key, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function ApiToken() {
   const [apiToken, setApiToken] = useState("");
@@ -24,7 +25,7 @@ export default function ApiToken() {
       const userData = JSON.parse(user);
       
       try {
-        const response = await fetch('http://18.142.200.244/api/get-token', {
+        const response = await fetch(`${API_BASE_URL}/api/get-token.php`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: userData.id })

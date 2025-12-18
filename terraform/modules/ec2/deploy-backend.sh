@@ -11,11 +11,15 @@ aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --
 # Pull latest image
 docker pull $ECR_REPO:latest
 
+# Stop Apache service if running on host
+systemctl stop apache2 2>/dev/null || true
+systemctl disable apache2 2>/dev/null || true
+
 # Stop and remove old container
 docker stop backend 2>/dev/null || true
 docker rm -f backend 2>/dev/null || true
 
-# Kill any process using port 80
+# Kill any remaining process using port 80
 fuser -k 80/tcp 2>/dev/null || true
 sleep 2
 

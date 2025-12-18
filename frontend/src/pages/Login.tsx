@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +26,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://18.142.200.244:8080/api/login', {
+      const response = await fetch(`${API_BASE_URL}/api/login.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

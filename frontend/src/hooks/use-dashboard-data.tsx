@@ -87,7 +87,7 @@ export function useDashboardData(): DashboardData {
       try {
         setData(prev => ({ ...prev, isLoading: true, error: null }));
         
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://13.214.163.207';
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://18.142.200.244';
         const response = await fetch(`${apiUrl}/api/logs.php?limit=50`);
         
         if (!response.ok) {

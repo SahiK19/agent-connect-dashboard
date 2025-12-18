@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Shield, Eye, EyeOff, Check, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +36,7 @@ export default function Register() {
     }
 
     try {
-      const response = await fetch('http://18.142.200.244/api/register', {
+      const response = await fetch(`${API_BASE_URL}/api/register.php`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
