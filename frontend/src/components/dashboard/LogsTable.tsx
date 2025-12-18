@@ -4,16 +4,16 @@ import { Badge } from "@/components/ui/badge";
 interface Log {
   id: string;
   timestamp: string;
-  sourceIp: string;
-  destIp?: string;
-  eventType: string;
-  severity: "low" | "medium" | "high" | "critical";
-  description: string;
+  source: string;
+  message: string;
+  severity: string;
+  raw_json: any;
+  created_at: string;
+  correlated: boolean;
 }
 
 interface LogsTableProps {
   logs: Log[];
-  type: "nids" | "hids";
 }
 
 const severityColors = {
@@ -23,7 +23,7 @@ const severityColors = {
   critical: "bg-destructive text-destructive-foreground",
 };
 
-export function LogsTable({ logs, type }: LogsTableProps) {
+export function LogsTable({ logs }: LogsTableProps) {
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <div className="overflow-x-auto">
@@ -31,24 +31,22 @@ export function LogsTable({ logs, type }: LogsTableProps) {
           <thead>
             <tr className="border-b border-border bg-secondary/30">
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                ID
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Timestamp
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Source IP
-              </th>
-              {type === "nids" && (
-                <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Dest IP
-                </th>
-              )}
-              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Event Type
+                Source
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Severity
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Description
+                Correlated
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Message
               </th>
             </tr>
           </thead>
@@ -59,29 +57,36 @@ export function LogsTable({ logs, type }: LogsTableProps) {
                 className="hover:bg-secondary/20 transition-colors duration-150"
               >
                 <td className="px-4 py-3 text-sm font-mono text-muted-foreground whitespace-nowrap">
-                  {log.timestamp}
+                  {log.id}
+                </td>
+                <td className="px-4 py-3 text-sm font-mono text-muted-foreground whitespace-nowrap">
+                  {new Date(log.created_at).toLocaleString()}
                 </td>
                 <td className="px-4 py-3 text-sm font-mono text-foreground whitespace-nowrap">
-                  {log.sourceIp}
-                </td>
-                {type === "nids" && (
-                  <td className="px-4 py-3 text-sm font-mono text-foreground whitespace-nowrap">
-                    {log.destIp}
-                  </td>
-                )}
-                <td className="px-4 py-3 text-sm text-foreground whitespace-nowrap">
-                  {log.eventType}
+                  <Badge variant="outline" className="capitalize">
+                    {log.source}
+                  </Badge>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <Badge
                     variant="outline"
-                    className={cn("capitalize", severityColors[log.severity])}
+                    className={cn("capitalize", 
+                      log.severity === 'critical' ? 'bg-destructive text-destructive-foreground' :
+                      log.severity === 'high' ? 'bg-destructive/20 text-destructive border-destructive/30' :
+                      log.severity === 'medium' ? 'bg-warning/20 text-warning border-warning/30' :
+                      'bg-muted text-muted-foreground'
+                    )}
                   >
                     {log.severity}
                   </Badge>
                 </td>
-                <td className="px-4 py-3 text-sm text-muted-foreground max-w-xs truncate">
-                  {log.description}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <Badge variant={log.correlated ? "default" : "secondary"}>
+                    {log.correlated ? "Yes" : "No"}
+                  </Badge>
+                </td>
+                <td className="px-4 py-3 text-sm text-muted-foreground max-w-md truncate">
+                  {log.message}
                 </td>
               </tr>
             ))}

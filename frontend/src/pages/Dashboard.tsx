@@ -147,7 +147,7 @@ export default function Dashboard() {
               </Button>
             </Link>
           </div>
-          <LogsTable logs={recentLogs} type="nids" />
+          <LogsTable logs={recentLogs} />
         </div>
       </div>
     </DashboardLayout>

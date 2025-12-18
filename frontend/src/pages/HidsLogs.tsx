@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { LogsTable } from "@/components/dashboard/LogsTable";
 import { HidsAnalytics } from "@/components/dashboard/HidsAnalytics";
@@ -13,86 +13,48 @@ import {
 } from "@/components/ui/select";
 import { Search, Filter, Download, RefreshCw } from "lucide-react";
 
-const mockLogs = [
-  {
-    id: "1",
-    timestamp: "2024-01-15 14:32:05",
-    sourceIp: "localhost",
-    eventType: "File Modification",
-    severity: "high" as const,
-    description: "Unauthorized modification detected in /etc/passwd",
-  },
-  {
-    id: "2",
-    timestamp: "2024-01-15 14:28:12",
-    sourceIp: "localhost",
-    eventType: "Process Anomaly",
-    severity: "critical" as const,
-    description: "Suspicious process spawned with elevated privileges",
-  },
-  {
-    id: "3",
-    timestamp: "2024-01-15 14:25:33",
-    sourceIp: "localhost",
-    eventType: "Login Attempt",
-    severity: "medium" as const,
-    description: "Multiple failed root login attempts via SSH",
-  },
-  {
-    id: "4",
-    timestamp: "2024-01-15 14:20:18",
-    sourceIp: "localhost",
-    eventType: "File Access",
-    severity: "low" as const,
-    description: "Sensitive configuration file accessed",
-  },
-  {
-    id: "5",
-    timestamp: "2024-01-15 14:15:42",
-    sourceIp: "localhost",
-    eventType: "Rootkit Detection",
-    severity: "critical" as const,
-    description: "Potential rootkit signatures detected in system binaries",
-  },
-  {
-    id: "6",
-    timestamp: "2024-01-15 14:10:55",
-    sourceIp: "localhost",
-    eventType: "Registry Change",
-    severity: "medium" as const,
-    description: "Startup registry key modified by unknown process",
-  },
-  {
-    id: "7",
-    timestamp: "2024-01-15 14:05:30",
-    sourceIp: "localhost",
-    eventType: "File Integrity",
-    severity: "high" as const,
-    description: "Critical system file hash mismatch detected",
-  },
-  {
-    id: "8",
-    timestamp: "2024-01-15 14:00:12",
-    sourceIp: "localhost",
-    eventType: "User Activity",
-    severity: "low" as const,
-    description: "New user account created without proper authorization",
-  },
-];
-
 export default function HidsLogs() {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState("all");
-  const [eventTypeFilter, setEventTypeFilter] = useState("all");
 
-  const filteredLogs = mockLogs.filter((log) => {
-    const matchesSearch =
-      log.sourceIp.includes(searchQuery) ||
-      log.description.toLowerCase().includes(searchQuery.toLowerCase());
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const response = await fetch('http://18.142.200.244:8080/api/dashboard-logs.php?source=wazuh&limit=100');
+        const data = await response.json();
+        setLogs(data.logs || []);
+      } catch (error) {
+        console.error('Failed to fetch logs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const filteredLogs = logs.filter((log) => {
+    const matchesSearch = log.message?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesSeverity = severityFilter === "all" || log.severity === severityFilter;
-    const matchesEventType = eventTypeFilter === "all" || log.eventType === eventTypeFilter;
-    return matchesSearch && matchesSeverity && matchesEventType;
+    return matchesSearch && matchesSeverity;
   });
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+            <p className="text-muted-foreground">Loading Wazuh logs...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -143,31 +105,18 @@ export default function HidsLogs() {
                 <SelectItem value="critical">Critical</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Event Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="File Modification">File Modification</SelectItem>
-                <SelectItem value="Process Anomaly">Process Anomaly</SelectItem>
-                <SelectItem value="Login Attempt">Login Attempt</SelectItem>
-                <SelectItem value="File Integrity">File Integrity</SelectItem>
-                <SelectItem value="Rootkit Detection">Rootkit Detection</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
         {/* Results info */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {filteredLogs.length} of {mockLogs.length} logs
+            Showing {filteredLogs.length} of {logs.length} Wazuh logs
           </p>
         </div>
 
         {/* Logs Table */}
-        <LogsTable logs={filteredLogs} type="hids" />
+        <LogsTable logs={filteredLogs} />
 
         {/* Pagination */}
         <div className="flex items-center justify-center gap-2">

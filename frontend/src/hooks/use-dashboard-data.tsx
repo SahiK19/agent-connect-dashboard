@@ -13,11 +13,12 @@ interface DashboardStats {
 interface LogEntry {
   id: string;
   timestamp: string;
-  sourceIp: string;
-  destIp: string;
-  eventType: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  description: string;
+  source: string;
+  message: string;
+  severity: string;
+  raw_json: any;
+  created_at: string;
+  correlated: boolean;
 }
 
 interface DashboardData {
@@ -106,17 +107,7 @@ export function useDashboardData(): DashboardData {
           const highAlerts = allLogs.filter(log => log.severity === 'high').length;
           const threatsBlocked = allLogs.length; // All correlated events are threats
           
-          const recentLogs: LogEntry[] = allLogs
-            .slice(0, 4)
-            .map(log => ({
-              id: log.id?.toString() || Math.random().toString(),
-              timestamp: new Date(log.created_at || log.timestamp).toLocaleString(),
-              sourceIp: 'N/A',
-              destIp: 'N/A', 
-              eventType: log.source || 'Security Event',
-              severity: (log.severity || 'medium') as 'low' | 'medium' | 'high' | 'critical',
-              description: log.message || 'Security event detected'
-            }));
+          const recentLogs = allLogs.slice(0, 10);
 
           setData(prev => ({
             ...prev,
