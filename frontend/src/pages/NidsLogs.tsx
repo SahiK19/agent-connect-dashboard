@@ -24,6 +24,7 @@ export default function NidsLogs() {
       try {
         const response = await fetch('http://18.142.200.244:8080/api/dashboard-logs.php?source=snort&limit=100');
         const data = await response.json();
+        console.log('NIDS Logs fetched:', data);
         setLogs(data.logs || []);
       } catch (error) {
         console.error('Failed to fetch logs:', error);

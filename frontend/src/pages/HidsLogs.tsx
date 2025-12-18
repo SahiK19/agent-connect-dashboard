@@ -24,6 +24,7 @@ export default function HidsLogs() {
       try {
         const response = await fetch('http://18.142.200.244:8080/api/dashboard-logs.php?source=wazuh&limit=100');
         const data = await response.json();
+        console.log('HIDS Logs fetched:', data);
         setLogs(data.logs || []);
       } catch (error) {
         console.error('Failed to fetch logs:', error);
