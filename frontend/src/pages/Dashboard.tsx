@@ -78,9 +78,9 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-foreground">Correlated Dashboard</h1>
             <p className="text-muted-foreground">
-              Welcome back, John. Here's your security overview.
+              Multi-stage attack detection and correlation analysis.
             </p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-success/30 bg-success/10">
@@ -94,7 +94,7 @@ export default function Dashboard() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard
-            title="Total Logs Today"
+            title="Correlated Events"
             value={stats.totalLogs.toLocaleString()}
             change={stats.logsChange}
             changeType="positive"
@@ -102,7 +102,7 @@ export default function Dashboard() {
             iconColor="primary"
           />
           <StatsCard
-            title="Threats Blocked"
+            title="Multi-Stage Attacks"
             value={stats.threatsBlocked.toString()}
             change={stats.threatsChange}
             changeType="positive"
@@ -139,7 +139,7 @@ export default function Dashboard() {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-foreground">
-              Recent Activity
+              Recent Correlated Events
             </h2>
             <Link to="/nids-logs">
               <Button variant="ghost" size="sm">

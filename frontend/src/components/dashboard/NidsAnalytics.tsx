@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -15,63 +16,70 @@ import {
 import { StatsCard } from "./StatsCard";
 import { Network, AlertTriangle, Shield, TrendingUp } from "lucide-react";
 
-const activityData = [
-  { time: "00:00", events: 12 },
-  { time: "04:00", events: 19 },
-  { time: "08:00", events: 45 },
-  { time: "12:00", events: 67 },
-  { time: "16:00", events: 89 },
-  { time: "20:00", events: 34 },
-  { time: "24:00", events: 18 },
-];
-
-const attackTypeData = [
-  { name: "Port Scan", value: 35, color: "hsl(187, 94%, 43%)" },
-  { name: "SQL Injection", value: 25, color: "hsl(0, 84%, 60%)" },
-  { name: "Brute Force", value: 20, color: "hsl(45, 93%, 47%)" },
-  { name: "DDoS", value: 12, color: "hsl(280, 85%, 55%)" },
-  { name: "Malware", value: 8, color: "hsl(142, 76%, 36%)" },
-];
-
-const sourceIpData = [
-  { ip: "192.168.1.x", count: 45 },
-  { ip: "203.45.67.x", count: 32 },
-  { ip: "172.16.0.x", count: 28 },
-  { ip: "45.33.32.x", count: 22 },
-  { ip: "103.21.58.x", count: 15 },
-];
-
 export function NidsAnalytics() {
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch('http://18.142.200.244:8080/api/analytics.php');
+        const data = await response.json();
+        setAnalyticsData(data);
+      } catch (error) {
+        console.error('Failed to fetch analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+    const interval = setInterval(fetchAnalytics, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading || !analyticsData) {
+    return <div className="flex items-center justify-center h-64">Loading analytics...</div>;
+  }
+
+  const snortData = analyticsData.hourly_data?.filter((d: any) => d.source === 'snort') || [];
+  const severityData = analyticsData.severity_distribution?.map((item: any, index: number) => ({
+    name: item.severity,
+    value: parseInt(item.count),
+    color: ['hsl(187, 94%, 43%)', 'hsl(45, 93%, 47%)', 'hsl(0, 84%, 60%)', 'hsl(280, 85%, 55%)'][index % 4]
+  })) || [];
+
+  const totals = analyticsData.totals || {};
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Events"
-          value="1,284"
+          value={totals.total_logs?.toString() || "0"}
           change="+12.5%"
           changeType="positive"
           icon={Network}
         />
         <StatsCard
           title="Critical Alerts"
-          value="23"
+          value={totals.critical_alerts?.toString() || "0"}
           change="+5.2%"
           changeType="negative"
           icon={AlertTriangle}
           iconColor="destructive"
         />
         <StatsCard
-          title="Blocked Attacks"
-          value="156"
+          title="Threats Blocked"
+          value={totals.total_threats?.toString() || "0"}
           change="+18.3%"
           changeType="positive"
           icon={Shield}
           iconColor="success"
         />
         <StatsCard
-          title="Avg Response"
-          value="1.2s"
+          title="Correlated Events"
+          value={totals.correlated_events?.toString() || "0"}
           change="-8.1%"
           changeType="positive"
           icon={TrendingUp}
@@ -89,7 +97,7 @@ export function NidsAnalytics() {
           </div>
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={activityData}>
+              <AreaChart data={snortData.map((d: any) => ({ time: d.hour, events: parseInt(d.count) }))}>
                 <defs>
                   <linearGradient id="nidsAreaGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(187, 94%, 43%)" stopOpacity={0.3} />
@@ -129,7 +137,7 @@ export function NidsAnalytics() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={attackTypeData}
+                  data={severityData}
                   cx="50%"
                   cy="50%"
                   innerRadius={40}
@@ -137,7 +145,7 @@ export function NidsAnalytics() {
                   paddingAngle={2}
                   dataKey="value"
                 >
-                  {attackTypeData.map((entry, index) => (
+                  {severityData.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -153,7 +161,7 @@ export function NidsAnalytics() {
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap justify-center gap-3 mt-2">
-            {attackTypeData.slice(0, 3).map((item) => (
+            {severityData.slice(0, 3).map((item: any) => (
               <div key={item.name} className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                 <span className="text-xs text-muted-foreground">{item.name}</span>
@@ -163,18 +171,18 @@ export function NidsAnalytics() {
         </div>
       </div>
 
-      {/* Top Source IPs */}
+      {/* Source Distribution */}
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Top Source IPs</h3>
-          <p className="text-sm text-muted-foreground">Most active suspicious sources</p>
+          <h3 className="text-lg font-semibold text-foreground">Event Sources</h3>
+          <p className="text-sm text-muted-foreground">Distribution by security source</p>
         </div>
         <div className="h-[150px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={sourceIpData} layout="vertical">
+            <BarChart data={analyticsData.source_distribution?.map((item: any) => ({ source: item.source, count: parseInt(item.count) })) || []} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 16%)" horizontal={false} />
               <XAxis type="number" stroke="hsl(215, 20%, 55%)" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis dataKey="ip" type="category" stroke="hsl(215, 20%, 55%)" fontSize={11} tickLine={false} axisLine={false} width={80} />
+              <YAxis dataKey="source" type="category" stroke="hsl(215, 20%, 55%)" fontSize={11} tickLine={false} axisLine={false} width={80} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(222, 47%, 8%)",

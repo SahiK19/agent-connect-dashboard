@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   AreaChart,
   Area,
@@ -15,63 +16,70 @@ import {
 import { StatsCard } from "./StatsCard";
 import { Server, AlertTriangle, FileWarning, Activity } from "lucide-react";
 
-const activityData = [
-  { time: "00:00", events: 8 },
-  { time: "04:00", events: 12 },
-  { time: "08:00", events: 28 },
-  { time: "12:00", events: 42 },
-  { time: "16:00", events: 56 },
-  { time: "20:00", events: 22 },
-  { time: "24:00", events: 14 },
-];
-
-const eventTypeData = [
-  { name: "File Modification", value: 30, color: "hsl(142, 76%, 36%)" },
-  { name: "Process Anomaly", value: 25, color: "hsl(0, 84%, 60%)" },
-  { name: "Login Attempt", value: 20, color: "hsl(45, 93%, 47%)" },
-  { name: "File Integrity", value: 15, color: "hsl(280, 85%, 55%)" },
-  { name: "Rootkit", value: 10, color: "hsl(187, 94%, 43%)" },
-];
-
-const affectedHostsData = [
-  { host: "web-server-01", count: 38 },
-  { host: "db-server-01", count: 25 },
-  { host: "app-server-02", count: 22 },
-  { host: "file-server", count: 18 },
-  { host: "mail-server", count: 12 },
-];
-
 export function HidsAnalytics() {
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch('http://18.142.200.244:8080/api/analytics.php');
+        const data = await response.json();
+        setAnalyticsData(data);
+      } catch (error) {
+        console.error('Failed to fetch analytics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+    const interval = setInterval(fetchAnalytics, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading || !analyticsData) {
+    return <div className="flex items-center justify-center h-64">Loading analytics...</div>;
+  }
+
+  const wazuhData = analyticsData.hourly_data?.filter((d: any) => d.source === 'wazuh') || [];
+  const severityData = analyticsData.severity_distribution?.map((item: any, index: number) => ({
+    name: item.severity,
+    value: parseInt(item.count),
+    color: ['hsl(142, 76%, 36%)', 'hsl(45, 93%, 47%)', 'hsl(0, 84%, 60%)', 'hsl(280, 85%, 55%)'][index % 4]
+  })) || [];
+
+  const totals = analyticsData.totals || {};
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Events"
-          value="856"
+          value={totals.total_logs?.toString() || "0"}
           change="+8.3%"
           changeType="positive"
           icon={Server}
         />
         <StatsCard
           title="Critical Alerts"
-          value="12"
+          value={totals.critical_alerts?.toString() || "0"}
           change="-2.1%"
           changeType="positive"
           icon={AlertTriangle}
           iconColor="destructive"
         />
         <StatsCard
-          title="File Changes"
-          value="234"
+          title="Threats Blocked"
+          value={totals.total_threats?.toString() || "0"}
           change="+15.7%"
           changeType="negative"
           icon={FileWarning}
           iconColor="warning"
         />
         <StatsCard
-          title="Active Hosts"
-          value="18"
+          title="Correlated Events"
+          value={totals.correlated_events?.toString() || "0"}
           change="+2"
           changeType="positive"
           icon={Activity}
@@ -89,7 +97,7 @@ export function HidsAnalytics() {
           </div>
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={activityData}>
+              <AreaChart data={wazuhData.map((d: any) => ({ time: d.hour, events: parseInt(d.count) }))}>
                 <defs>
                   <linearGradient id="hidsAreaGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(142, 76%, 36%)" stopOpacity={0.3} />
@@ -129,7 +137,7 @@ export function HidsAnalytics() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={eventTypeData}
+                  data={severityData}
                   cx="50%"
                   cy="50%"
                   innerRadius={40}
@@ -137,7 +145,7 @@ export function HidsAnalytics() {
                   paddingAngle={2}
                   dataKey="value"
                 >
-                  {eventTypeData.map((entry, index) => (
+                  {severityData.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -153,7 +161,7 @@ export function HidsAnalytics() {
             </ResponsiveContainer>
           </div>
           <div className="flex flex-wrap justify-center gap-3 mt-2">
-            {eventTypeData.slice(0, 3).map((item) => (
+            {severityData.slice(0, 3).map((item: any) => (
               <div key={item.name} className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
                 <span className="text-xs text-muted-foreground">{item.name}</span>
@@ -163,18 +171,18 @@ export function HidsAnalytics() {
         </div>
       </div>
 
-      {/* Affected Hosts */}
+      {/* Source Distribution */}
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-foreground">Most Affected Hosts</h3>
-          <p className="text-sm text-muted-foreground">Hosts with most security events</p>
+          <h3 className="text-lg font-semibold text-foreground">Event Sources</h3>
+          <p className="text-sm text-muted-foreground">Distribution by security source</p>
         </div>
         <div className="h-[150px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={affectedHostsData} layout="vertical">
+            <BarChart data={analyticsData.source_distribution?.map((item: any) => ({ source: item.source, count: parseInt(item.count) })) || []} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 16%)" horizontal={false} />
               <XAxis type="number" stroke="hsl(215, 20%, 55%)" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis dataKey="host" type="category" stroke="hsl(215, 20%, 55%)" fontSize={11} tickLine={false} axisLine={false} width={100} />
+              <YAxis dataKey="source" type="category" stroke="hsl(215, 20%, 55%)" fontSize={11} tickLine={false} axisLine={false} width={100} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: "hsl(222, 47%, 8%)",
