@@ -155,10 +155,10 @@ const NIDSLogs = () => {
                       {log.timestamp}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.agent_id || 'N/A'}
+                      {log.agent_id}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.agent_id || 'Unknown'}
+                      {log.source_ip || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {log.source_port || 'N/A'}
