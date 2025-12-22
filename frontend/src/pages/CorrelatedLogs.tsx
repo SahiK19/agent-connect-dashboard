@@ -8,7 +8,7 @@ const CorrelatedLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_URL = "http://18.142.200.244:8080/api/dashboard-logs.php?source=correlation&limit=50";
+  const API_URL = "http://18.142.200.244:8080/api/dashboard-logs.php?source=correlated&limit=50";
 
   const fetchLogs = async () => {
     try {
