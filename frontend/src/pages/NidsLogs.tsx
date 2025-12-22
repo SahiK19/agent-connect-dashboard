@@ -179,7 +179,12 @@ const NIDSLogs = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 min-w-[300px]">
-                      {log.signature || log.message || 'N/A'}
+                      {(() => {
+                        console.log('NIDS Log object:', log); // Debug each log
+                        const message = log.signature || log.message || log.description || log.alert_description || JSON.stringify(log);
+                        console.log('NIDS Message found:', message);
+                        return message || 'N/A';
+                      })()}
                     </td>
                   </tr>
                 ))}

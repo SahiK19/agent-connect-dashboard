@@ -165,7 +165,12 @@ const HIDSLogs = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 min-w-[300px]">
-                        {log.message || log.rule_description || log.description || log.signature || 'N/A'}
+                        {(() => {
+                          console.log('Log object:', log); // Debug each log
+                          const message = log.message || log.rule_description || log.description || log.signature || log.alert_description || log.full_log || JSON.stringify(log);
+                          console.log('Message found:', message);
+                          return message || 'N/A';
+                        })()}
                       </td>
                     </tr>
                   ))}

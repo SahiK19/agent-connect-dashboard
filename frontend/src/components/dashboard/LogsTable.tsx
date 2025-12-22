@@ -86,7 +86,31 @@ export function LogsTable({ logs }: LogsTableProps) {
                   </Badge>
                 </td>
                 <td className="px-4 py-3 text-sm text-muted-foreground max-w-md truncate">
-                  {log.message}
+                  {(() => {
+                    console.log('Dashboard log object:', log); // Debug each log
+                    let message = log.message;
+                    
+                    // If message is empty, try to extract from raw_json
+                    if (!message && log.raw_json) {
+                      try {
+                        const rawData = typeof log.raw_json === 'string' ? JSON.parse(log.raw_json) : log.raw_json;
+                        if (rawData.message) {
+                          message = rawData.message;
+                        } else if (rawData.correlation_type) {
+                          message = rawData.correlation_type;
+                        } else if (rawData.stage1 && rawData.stage2) {
+                          const stage1 = rawData.stage1.wazuh_alert || 'Unknown event';
+                          const stage2 = rawData.stage2.wazuh_alert || 'Unknown event';
+                          message = `Correlated events: ${stage1} → ${stage2}`;
+                        }
+                      } catch (e) {
+                        console.error('Error parsing raw_json:', e);
+                      }
+                    }
+                    
+                    console.log('Dashboard message found:', message);
+                    return message || 'No description available';
+                  })()}
                 </td>
               </tr>
             ))}

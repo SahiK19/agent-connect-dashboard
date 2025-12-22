@@ -141,7 +141,7 @@ export default function Dashboard() {
             <h2 className="text-lg font-semibold text-foreground">
               Recent Correlated Events
             </h2>
-            <Link to="/nids-logs">
+            <Link to="/correlated-logs">
               <Button variant="ghost" size="sm">
                 View All
               </Button>

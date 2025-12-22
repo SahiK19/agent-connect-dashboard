@@ -21,6 +21,10 @@ const CorrelatedLogs = () => {
       }
       
       const data = await response.json();
+      console.log('Correlated Logs API Response:', data); // Debug log
+      if (data.length > 0) {
+        console.log('First correlated log item:', data[0]); // Debug log
+      }
       setLogs(data);
     } catch (err) {
       setError(err.message);
@@ -140,7 +144,12 @@ const CorrelatedLogs = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 min-w-[300px]">
-                        {log.message || 'N/A'}
+                        {(() => {
+                          console.log('Correlated log object:', log); // Debug each log
+                          const message = log.message || log.description || log.alert_description || log.event_description || JSON.stringify(log);
+                          console.log('Correlated message found:', message);
+                          return message || 'No description available';
+                        })()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDateTime(log.created_at)}
