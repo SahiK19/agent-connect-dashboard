@@ -43,7 +43,12 @@ try {
         'logs' => $logs,
         'total' => $total,
         'limit' => $limit,
-        'offset' => $offset
+        'offset' => $offset,
+        'debug' => [
+            'sql' => $sql,
+            'logs_count' => count($logs),
+            'raw_logs' => $logs
+        ]
     ]);
     
 } catch (Exception $e) {
