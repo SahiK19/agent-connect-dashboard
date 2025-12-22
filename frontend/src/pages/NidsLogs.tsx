@@ -97,7 +97,7 @@ const NIDSLogs = () => {
         )}
 
         <div className="mb-6">
-          <SeverityDistribution />
+          <SeverityDistribution displayedRows={logs} />
         </div>
 
         {logs.length === 0 && !loading ? (
