@@ -3,6 +3,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw } from 'lucide-react';
+import SeverityDistribution from '@/components/dashboard/SeverityDistribution';
 
 const HIDSLogs = () => {
   const [logs, setLogs] = useState([]);
@@ -90,6 +91,10 @@ const HIDSLogs = () => {
             Error: {error}
           </div>
         )}
+
+        <div className="mb-6">
+          <SeverityDistribution />
+        </div>
 
         {logs.length === 0 && !loading ? (
           <div className="text-center py-12">
