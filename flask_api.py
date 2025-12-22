@@ -96,7 +96,12 @@ def get_activity_overview():
             "correlated": correlated_data
         }
         
-        return jsonify(response)
+        from flask import make_response
+        resp = make_response(jsonify(response))
+        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Expires'] = '0'
+        return resp
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
