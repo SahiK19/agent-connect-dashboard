@@ -20,13 +20,86 @@ DB_CONFIG = {
 
 @app.route('/api/wazuh-logs', methods=['GET'])
 def get_wazuh_logs():
-    # Return sample data for now - replace with actual Wazuh data
-    return jsonify([])
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM wazuh_logs ORDER BY created_at DESC LIMIT 100")
+        logs = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(logs)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/snort-logs', methods=['GET'])
 def get_snort_logs():
-    # Return sample data for now - replace with actual Snort data
-    return jsonify([])
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM snort_logs ORDER BY created_at DESC LIMIT 100")
+        logs = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(logs)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/activity-overview', methods=['GET'])
+def get_activity_overview():
+    try:
+        # Connect to database
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get hourly counts for last 24 hours
+        # Snort logs
+        snort_query = """
+        SELECT HOUR(created_at) as hour, COUNT(*) as count 
+        FROM snort_logs 
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        GROUP BY HOUR(created_at)
+        """
+        
+        # Wazuh logs  
+        wazuh_query = """
+        SELECT HOUR(created_at) as hour, COUNT(*) as count 
+        FROM wazuh_logs 
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        GROUP BY HOUR(created_at)
+        """
+        
+        # Correlated logs
+        correlated_query = """
+        SELECT HOUR(created_at) as hour, COUNT(*) as count 
+        FROM security_logs 
+        WHERE correlated = 1 AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        GROUP BY HOUR(created_at)
+        """
+        
+        # Execute queries
+        cursor.execute(snort_query)
+        snort_data = cursor.fetchall()
+        
+        cursor.execute(wazuh_query)
+        wazuh_data = cursor.fetchall()
+        
+        cursor.execute(correlated_query)
+        correlated_data = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        # Format response
+        response = {
+            "snort": snort_data,
+            "wazuh": wazuh_data,
+            "correlated": correlated_data
+        }
+        
+        return jsonify(response)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/correlated-logs', methods=['GET'])
 def get_correlated_logs():
