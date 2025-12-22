@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { LogsTable } from "@/components/dashboard/LogsTable";
+import { SnortLogsTable } from "@/components/dashboard/SnortLogsTable";
 import { NidsAnalytics } from "@/components/dashboard/NidsAnalytics";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,27 +19,30 @@ export default function NidsLogs() {
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState("all");
 
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const response = await fetch('http://18.142.200.244:8080/api/dashboard-logs.php?source=snort&limit=100');
-        const data = await response.json();
-        console.log('NIDS Logs fetched:', data);
-        setLogs(data.logs || []);
-      } catch (error) {
-        console.error('Failed to fetch logs:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchLogs = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://18.142.200.244:8080/api/snort-logs.php?limit=100');
+      const data = await response.json();
+      console.log('Snort Logs fetched:', data);
+      setLogs(data.logs || []);
+    } catch (error) {
+      console.error('Failed to fetch Snort logs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchLogs();
     const interval = setInterval(fetchLogs, 30000);
     return () => clearInterval(interval);
   }, []);
 
   const filteredLogs = logs.filter((log) => {
-    const matchesSearch = log.message?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = log.signature?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         log.source_ip?.includes(searchQuery) ||
+                         log.dest_ip?.includes(searchQuery);
     const matchesSeverity = severityFilter === "all" || log.severity === severityFilter;
     return matchesSearch && matchesSeverity;
   });
@@ -67,7 +70,7 @@ export default function NidsLogs() {
             <p className="text-muted-foreground">Network Intrusion Detection System logs</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={fetchLogs}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
@@ -113,12 +116,21 @@ export default function NidsLogs() {
         {/* Results info */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {filteredLogs.length} of {logs.length} Snort logs
+            {filteredLogs.length === 0 && logs.length === 0 ? 
+              "No Snort logs available" : 
+              `Showing ${filteredLogs.length} of ${logs.length} Snort logs`
+            }
           </p>
         </div>
 
         {/* Logs Table */}
-        <LogsTable logs={filteredLogs} />
+        {filteredLogs.length === 0 && logs.length === 0 ? (
+          <div className="rounded-xl border border-border bg-card p-8 text-center">
+            <p className="text-muted-foreground">No Snort logs available</p>
+          </div>
+        ) : (
+          <SnortLogsTable logs={filteredLogs} />
+        )}
 
         {/* Pagination */}
         <div className="flex items-center justify-center gap-2">

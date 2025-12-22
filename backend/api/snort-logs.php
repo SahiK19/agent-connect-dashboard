@@ -22,60 +22,34 @@ try {
     $db = new Database();
     $conn = $db->getConnection();
     
-    // Get query parameters
-    $source = $_GET['source'] ?? null;
     $limit = min((int)($_GET['limit'] ?? 100), 1000);
     $offset = (int)($_GET['offset'] ?? 0);
     
-    // Build query based on source filter
-    $whereClause = '';
-    $params = [];
-    
-    if ($source) {
-        if ($source === 'correlated') {
-            $whereClause = 'WHERE correlated = 1';
-        } else {
-            $whereClause = 'WHERE source = ?';
-            $params[] = $source;
-        }
-    }
-    
-    $sql = "SELECT id, timestamp, source, message, severity, raw_json, created_at, correlated 
-            FROM security_logs 
-            $whereClause 
+    $sql = "SELECT id, timestamp, source_ip, dest_ip, source_port, dest_port, protocol, signature, severity, event_type, raw_data, created_at 
+            FROM snort_logs 
             ORDER BY created_at DESC 
             LIMIT ? OFFSET ?";
     
-    $params[] = $limit;
-    $params[] = $offset;
-    
     $stmt = $conn->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute([$limit, $offset]);
     $logs = $stmt->fetchAll();
     
     // Get total count
-    $countSql = "SELECT COUNT(*) as total FROM security_logs $whereClause";
-    $countStmt = $conn->prepare($countSql);
-    $countStmt->execute(array_slice($params, 0, -2));
+    $countStmt = $conn->prepare("SELECT COUNT(*) as total FROM snort_logs");
+    $countStmt->execute();
     $total = $countStmt->fetch()['total'];
     
     echo json_encode([
         'logs' => $logs,
         'total' => $total,
         'limit' => $limit,
-        'offset' => $offset,
-        'debug' => [
-            'source_filter' => $source,
-            'sql' => $sql,
-            'params' => $params,
-            'logs_count' => count($logs)
-        ]
+        'offset' => $offset
     ]);
     
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
-        'error' => 'Failed to fetch logs',
+        'error' => 'Failed to fetch Snort logs',
         'message' => APP_ENV === 'development' ? $e->getMessage() : 'Internal server error'
     ]);
 }
