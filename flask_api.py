@@ -25,8 +25,43 @@ def get_wazuh_logs():
 
 @app.route('/api/snort-logs', methods=['GET'])
 def get_snort_logs():
-    # Return sample data for now - replace with actual Snort data
-    return jsonify([])
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT id, timestamp, source_ip, dest_ip, source_port, dest_port, 
+               severity, signature, agent_id, created_at
+        FROM snort_logs 
+        ORDER BY created_at DESC 
+        LIMIT 100
+        """
+        
+        cursor.execute(query)
+        results = cursor.fetchall()
+        
+        logs = []
+        for r in results:
+            logs.append({
+                "id": r["id"],
+                "timestamp": r["timestamp"],
+                "source": "snort",
+                "agent_id": r.get("agent_id"),
+                "source_ip": r["source_ip"],
+                "dest_ip": r["dest_ip"],
+                "source_port": r["source_port"],
+                "dest_port": r["dest_port"],
+                "severity": r["severity"],
+                "signature": r["signature"]
+            })
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(logs)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/activity-overview', methods=['GET'])
 def get_activity_overview():
