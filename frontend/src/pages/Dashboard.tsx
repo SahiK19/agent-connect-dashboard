@@ -4,6 +4,7 @@ import { ActivityChart } from "@/components/dashboard/ActivityChart";
 import SeverityDistribution from "@/components/dashboard/SeverityDistribution";
 import { LogsTable } from "@/components/dashboard/LogsTable";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
+import { useState, useEffect } from 'react';
 import {
   Shield,
   AlertTriangle,
@@ -17,6 +18,35 @@ import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
   const { stats, recentLogs, isLoading, error, isAgentConnected } = useDashboardData();
+  
+  // State for critical alerts count - fetched from dedicated API endpoint
+  const [criticalCount, setCriticalCount] = useState(0);
+
+  // Fetch critical alerts count from /api/dashboard/critical-count
+  const fetchCriticalCount = async () => {
+    try {
+      const response = await fetch('http://18.142.200.244:5000/api/dashboard/critical-count', { 
+        cache: 'no-store' 
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setCriticalCount(data.critical || 0);
+    } catch (err) {
+      console.warn('Failed to fetch critical count:', err);
+      // Keep previous value on error
+    }
+  };
+
+  // Auto-refresh critical count every 15 seconds
+  useEffect(() => {
+    fetchCriticalCount();
+    const interval = setInterval(fetchCriticalCount, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (isLoading) {
     return (
@@ -111,9 +141,9 @@ export default function Dashboard() {
           />
           <StatsCard
             title="Critical Alerts"
-            value={stats.criticalAlerts.toString()}
+            value={criticalCount.toString()}
             change={stats.alertsChange}
-            changeType={stats.criticalAlerts > 0 ? "negative" : "positive"}
+            changeType={criticalCount > 0 ? "negative" : "positive"}
             icon={AlertTriangle}
             iconColor="destructive"
           />

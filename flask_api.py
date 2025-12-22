@@ -100,6 +100,29 @@ def get_severity_distribution():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/dashboard/critical-count', methods=['GET'])
+def get_critical_count():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT COUNT(*) as critical 
+        FROM security_logs 
+        WHERE correlated = 1 AND LOWER(severity) = 'critical'
+        """
+        
+        cursor.execute(query)
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'critical': result['critical'] if result else 0})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/correlated-logs', methods=['GET'])
 def get_correlated_logs():
     try:
