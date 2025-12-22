@@ -6,7 +6,6 @@ import {
   Server,
   AlertTriangle,
   Download,
-  Activity,
   Key,
   LogOut,
   Menu,
@@ -22,7 +21,6 @@ const navItems = [
   { icon: Server, label: "HIDS Logs", path: "/hids-logs" },
   { icon: AlertTriangle, label: "Correlated Events", path: "/correlated-logs" },
   { icon: Download, label: "Install Agent", path: "/install-agent" },
-  { icon: Activity, label: "Agent Status", path: "/agent-status" },
   { icon: Key, label: "API Token", path: "/api-token" },
 ];
 

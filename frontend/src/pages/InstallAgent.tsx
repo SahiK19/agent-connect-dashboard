@@ -39,7 +39,6 @@ sudo systemctl start wazuh-agent`;
 
 export default function InstallAgent() {
   const [copiedStep, setCopiedStep] = useState<string | null>(null);
-  const [selectedPackage, setSelectedPackage] = useState<PackageType>('deb-amd64');
   const [agentName, setAgentName] = useState('');
   const [wazuhManager] = useState('47.130.204.203');
   const { toast } = useToast();
@@ -54,7 +53,7 @@ export default function InstallAgent() {
     });
   };
 
-  const installCommand = packageOptions[selectedPackage].command(wazuhManager, agentName || 'wazuh-agent');
+  const installCommand = packageOptions['deb-amd64'].command(wazuhManager, agentName || 'wazuh-agent');
 
   return (
     <DashboardLayout>
@@ -79,18 +78,9 @@ export default function InstallAgent() {
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="package">Package Type</Label>
-                <Select value={selectedPackage} onValueChange={(value: PackageType) => setSelectedPackage(value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(packageOptions).map(([key, option]) => (
-                      <SelectItem key={key} value={key}>
-                        {option.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="p-3 rounded-lg bg-secondary/50 border border-border">
+                  <span className="text-sm font-medium">DEB (amd64)</span>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="agentName">Agent Name</Label>
