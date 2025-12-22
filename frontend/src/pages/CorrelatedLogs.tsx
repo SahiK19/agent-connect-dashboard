@@ -8,7 +8,7 @@ const CorrelatedLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_URL = "http://18.142.200.244:5000/api/correlated-logs";
+  const API_URL = "http://18.142.200.244:8080/api/dashboard-logs.php?source=correlation&limit=50";
 
   const fetchLogs = async () => {
     try {
@@ -20,12 +20,9 @@ const CorrelatedLogs = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      const data = await response.json();
-      console.log('Correlated Logs API Response:', data); // Debug log
-      if (data.length > 0) {
-        console.log('First correlated log item:', data[0]); // Debug log
-      }
-      setLogs(data);
+      const result = await response.json();
+      const logs = result.logs || [];
+      setLogs(logs);
     } catch (err) {
       setError(err.message);
       console.error('Failed to fetch correlated logs:', err);
