@@ -123,6 +123,54 @@ def get_critical_count():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/dashboard/correlated-stats', methods=['GET'])
+def get_correlated_stats():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        # Get today's count (last 24 hours)
+        today_query = """
+        SELECT COUNT(*) as today 
+        FROM security_logs 
+        WHERE correlated = 1 AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        """
+        
+        # Get yesterday's count (24-48 hours ago)
+        yesterday_query = """
+        SELECT COUNT(*) as yesterday 
+        FROM security_logs 
+        WHERE correlated = 1 
+        AND created_at >= DATE_SUB(NOW(), INTERVAL 48 HOUR)
+        AND created_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        """
+        
+        cursor.execute(today_query)
+        today_result = cursor.fetchone()
+        today = today_result['today'] if today_result else 0
+        
+        cursor.execute(yesterday_query)
+        yesterday_result = cursor.fetchone()
+        yesterday = yesterday_result['yesterday'] if yesterday_result else 0
+        
+        # Calculate percentage change
+        if yesterday > 0:
+            percentage_change = round(((today - yesterday) / yesterday) * 100, 1)
+        else:
+            percentage_change = 100 if today > 0 else 0
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            'today': today,
+            'yesterday': yesterday,
+            'percentage_change': percentage_change
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/correlated-logs', methods=['GET'])
 def get_correlated_logs():
     try:

@@ -21,6 +21,36 @@ export default function Dashboard() {
   
   // State for critical alerts count - fetched from dedicated API endpoint
   const [criticalCount, setCriticalCount] = useState(0);
+  
+  // State for correlated events stats - fetched from dedicated API endpoint
+  const [correlatedStats, setCorrelatedStats] = useState({
+    today: 0,
+    yesterday: 0,
+    percentage_change: 0
+  });
+
+  // Fetch correlated events stats from /api/dashboard/correlated-stats
+  const fetchCorrelatedStats = async () => {
+    try {
+      const response = await fetch('http://18.142.200.244:5000/api/dashboard/correlated-stats', { 
+        cache: 'no-store' 
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setCorrelatedStats({
+        today: data.today || 0,
+        yesterday: data.yesterday || 0,
+        percentage_change: data.percentage_change || 0
+      });
+    } catch (err) {
+      console.warn('Failed to fetch correlated stats:', err);
+      // Keep previous values on error
+    }
+  };
 
   // Fetch critical alerts count from /api/dashboard/critical-count
   const fetchCriticalCount = async () => {
@@ -41,11 +71,18 @@ export default function Dashboard() {
     }
   };
 
-  // Auto-refresh critical count every 15 seconds
+  // Auto-refresh critical count every 15 seconds and correlated stats every 10 minutes
   useEffect(() => {
     fetchCriticalCount();
-    const interval = setInterval(fetchCriticalCount, 15000);
-    return () => clearInterval(interval);
+    fetchCorrelatedStats();
+    
+    const criticalInterval = setInterval(fetchCriticalCount, 15000);
+    const correlatedInterval = setInterval(fetchCorrelatedStats, 600000); // 10 minutes
+    
+    return () => {
+      clearInterval(criticalInterval);
+      clearInterval(correlatedInterval);
+    };
   }, []);
 
   if (isLoading) {
@@ -125,9 +162,9 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatsCard
             title="Correlated Events"
-            value={stats.totalLogs.toLocaleString()}
-            change={stats.logsChange}
-            changeType="positive"
+            value={correlatedStats.today.toLocaleString()}
+            change={`${correlatedStats.percentage_change >= 0 ? '+' : ''}${correlatedStats.percentage_change}% from yesterday`}
+            changeType={correlatedStats.percentage_change >= 0 ? "positive" : "negative"}
             icon={Activity}
             iconColor="primary"
           />
