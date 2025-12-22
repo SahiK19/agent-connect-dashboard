@@ -23,6 +23,10 @@ const NIDSLogs = () => {
       }
       
       const data = await response.json();
+      console.log('NIDS API Response:', data); // Debug log
+      if (data.length > 0) {
+        console.log('First NIDS log item:', data[0]); // Debug log
+      }
       setLogs(data);
     } catch (err) {
       setError(err.message);

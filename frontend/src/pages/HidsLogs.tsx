@@ -23,6 +23,10 @@ const HIDSLogs = () => {
       }
       
       const data = await response.json();
+      console.log('API Response:', data); // Debug log
+      if (data.length > 0) {
+        console.log('First log item:', data[0]); // Debug log
+      }
       setLogs(data);
     } catch (err) {
       setError(err.message);
@@ -161,7 +165,7 @@ const HIDSLogs = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 min-w-[300px]">
-                        {log.message || 'N/A'}
+                        {log.message || log.rule_description || log.description || log.signature || 'N/A'}
                       </td>
                     </tr>
                   ))}
