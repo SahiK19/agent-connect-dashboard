@@ -76,6 +76,30 @@ def get_activity_overview():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/severity-distribution', methods=['GET'])
+def get_severity_distribution():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT severity, COUNT(*) as count 
+        FROM security_logs 
+        WHERE correlated = 1 
+        GROUP BY severity
+        """
+        
+        cursor.execute(query)
+        data = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(data)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/correlated-logs', methods=['GET'])
 def get_correlated_logs():
     try:

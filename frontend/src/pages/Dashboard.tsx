@@ -1,7 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { ActivityChart } from "@/components/dashboard/ActivityChart";
-import { ThreatDistribution } from "@/components/dashboard/ThreatDistribution";
+import SeverityDistribution from "@/components/dashboard/SeverityDistribution";
 import { LogsTable } from "@/components/dashboard/LogsTable";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
 import {
@@ -132,7 +132,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <ActivityChart />
           </div>
-          <ThreatDistribution />
+          <SeverityDistribution />
         </div>
 
         {/* Recent Logs */}
