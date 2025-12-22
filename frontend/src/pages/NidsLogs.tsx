@@ -9,11 +9,13 @@ const NIDSLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const API_URL = "http://18.142.200.244:5000/api/logs";
+
   const fetchLogs = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://10.0.1.99:5000/api/logs');
+      const response = await fetch(API_URL);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
