@@ -9,7 +9,7 @@ const NIDSLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_URL = "http://18.142.200.244:5000/api/logs";
+  const API_URL = "http://18.142.200.244:5000/api/snort-logs";
 
   const fetchLogs = async () => {
     try {
@@ -22,8 +22,7 @@ const NIDSLogs = () => {
       }
       
       const data = await response.json();
-      const snortLogs = data.filter(log => log.source === 'snort');
-      setLogs(snortLogs);
+      setLogs(data);
     } catch (err) {
       setError(err.message);
       console.error('Failed to fetch logs:', err);
@@ -143,16 +142,16 @@ const NIDSLogs = () => {
                       {log.timestamp}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.src_ip || 'N/A'}
+                      {log.source_ip || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.src_port || 'N/A'}
+                      {log.source_port || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.dst_ip || 'N/A'}
+                      {log.dest_ip || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.dst_port || 'N/A'}
+                      {log.dest_port || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge variant="outline" className="capitalize">
@@ -170,7 +169,7 @@ const NIDSLogs = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
-                      {log.message}
+                      {log.signature || log.message || 'N/A'}
                     </td>
                   </tr>
                 ))}
