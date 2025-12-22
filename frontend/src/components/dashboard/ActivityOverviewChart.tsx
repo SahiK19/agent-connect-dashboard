@@ -5,6 +5,8 @@ const ActivityOverviewChart = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastFetch, setLastFetch] = useState(null);
+  const [rawApiData, setRawApiData] = useState(null);
 
   const API_URL = "http://18.142.200.244:5000/api/activity-overview";
 
@@ -19,6 +21,9 @@ const ActivityOverviewChart = () => {
       }
       
       const apiData = await response.json();
+      console.log('🔄 Activity Overview API Response:', apiData);
+      setRawApiData(apiData);
+      setLastFetch(new Date().toLocaleTimeString());
       
       // Normalize data into 24 hourly buckets (0-23)
       const normalizedData = [];
@@ -36,10 +41,11 @@ const ActivityOverviewChart = () => {
         });
       }
       
+      console.log('📊 Normalized chart data:', normalizedData);
       setData(normalizedData);
     } catch (err) {
       setError(err.message);
-      console.error('Failed to fetch activity overview:', err);
+      console.error('❌ Failed to fetch activity overview:', err);
     } finally {
       setLoading(false);
     }
@@ -70,6 +76,10 @@ const ActivityOverviewChart = () => {
     return null;
   };
 
+  const getTotalEvents = () => {
+    return data.reduce((total, hour) => total + hour.NIDS + hour.HIDS + hour.Correlated, 0);
+  };
+
   if (loading) {
     return (
       <div className="bg-gray-900 rounded-lg p-6">
@@ -86,7 +96,15 @@ const ActivityOverviewChart = () => {
       <div className="bg-gray-900 rounded-lg p-6">
         <h3 className="text-lg font-semibold text-white mb-4">Activity Overview (24h)</h3>
         <div className="flex items-center justify-center h-64">
-          <p className="text-red-400">Error: {error}</p>
+          <div className="text-center">
+            <p className="text-red-400 mb-2">Error: {error}</p>
+            <button 
+              onClick={fetchData}
+              className="text-blue-400 hover:text-blue-300 underline"
+            >
+              Retry
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -94,7 +112,24 @@ const ActivityOverviewChart = () => {
 
   return (
     <div className="bg-gray-900 rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-white mb-4">Activity Overview (24h)</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-white">Activity Overview (24h)</h3>
+        <div className="text-right">
+          <p className="text-xs text-gray-400">Last updated: {lastFetch}</p>
+          <p className="text-xs text-gray-400">Total events: {getTotalEvents()}</p>
+        </div>
+      </div>
+      
+      {/* Debug info - shows raw API data */}
+      <details className="mb-4">
+        <summary className="text-xs text-gray-500 cursor-pointer hover:text-gray-400">
+          🔍 Debug: View Raw API Data
+        </summary>
+        <pre className="text-xs text-gray-400 bg-gray-800 p-2 rounded mt-2 overflow-auto max-h-32">
+          {JSON.stringify(rawApiData, null, 2)}
+        </pre>
+      </details>
+      
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
