@@ -24,17 +24,26 @@ const SeverityDistribution = () => {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch(API_URL);
+      const response = await fetch(API_URL, { cache: "no-store" });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const result = await response.json();
-      setData(result);
+      
+      // Map severity to label and calculate percentages
+      const total = result.reduce((sum: number, item: any) => sum + item.count, 0);
+      const processedData = result.map((item: any) => ({
+        label: item.severity,
+        count: item.count,
+        percentage: total > 0 ? (item.count / total) * 100 : 0
+      }));
+      
+      setData(processedData);
+      setError(null);
     } catch (err) {
+      console.warn('Failed to fetch severity distribution:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch data');
     } finally {
       setLoading(false);
@@ -43,6 +52,8 @@ const SeverityDistribution = () => {
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const chartConfig = {
