@@ -54,17 +54,20 @@ const SeverityDistribution = () => {
 
   const CustomLegend = ({ payload }: any) => (
     <div className="flex flex-wrap justify-center gap-4 mt-4">
-      {payload?.map((entry: any, index: number) => (
-        <div key={index} className="flex items-center gap-2">
-          <div 
-            className="w-3 h-3 rounded-full" 
-            style={{ backgroundColor: entry.color }}
-          />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            {entry.value} ({data.find(d => d.label === entry.value)?.percentage.toFixed(1)}%)
-          </span>
-        </div>
-      ))}
+      {payload?.map((entry: any, index: number) => {
+        const severityData = data.find(d => d.label === entry.value);
+        return (
+          <div key={index} className="flex items-center gap-2">
+            <div 
+              className="w-3 h-3 rounded-full" 
+              style={{ backgroundColor: entry.color }}
+            />
+            <span className="text-sm text-gray-700 dark:text-gray-300">
+              {entry.value} ({severityData?.percentage.toFixed(1)}%)
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 
@@ -136,6 +139,7 @@ const SeverityDistribution = () => {
               outerRadius={100}
               paddingAngle={2}
               dataKey="percentage"
+              nameKey="label"
             >
               {data.map((entry, index) => (
                 <Cell 
