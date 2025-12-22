@@ -132,7 +132,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <ActivityChart />
           </div>
-          <SeverityDistribution />
+          <SeverityDistribution displayedRows={recentLogs} />
         </div>
 
         {/* Recent Logs */}

@@ -8,12 +8,12 @@ interface SeverityData {
   percentage: number;
 }
 
-const SeverityDistribution = () => {
-  const [data, setData] = useState<SeverityData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface SeverityDistributionProps {
+  displayedRows: any[];
+}
 
-  const API_URL = "http://18.142.200.244:5000/api/severity-distribution";
+const SeverityDistribution = ({ displayedRows }: SeverityDistributionProps) => {
+  const [data, setData] = useState<SeverityData[]>([]);
 
   const colorMap = {
     Critical: '#ef4444', // red-500
@@ -22,39 +22,38 @@ const SeverityDistribution = () => {
     Low: '#22c55e'       // green-500
   };
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch(API_URL, { cache: "no-store" });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const result = await response.json();
-      
-      // Map severity to label and calculate percentages
-      const total = result.reduce((sum: number, item: any) => sum + item.count, 0);
-      const processedData = result.map((item: any) => ({
-        label: item.severity,
-        count: item.count,
-        percentage: total > 0 ? (item.count / total) * 100 : 0
-      }));
-      
-      setData(processedData);
-      setError(null);
-    } catch (err) {
-      console.warn('Failed to fetch severity distribution:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch data');
-    } finally {
-      setLoading(false);
+  // Calculate severity distribution from displayed table rows
+  const calculateSeverityDistribution = (rows: any[]) => {
+    if (!rows || rows.length === 0) {
+      return [];
     }
+
+    // Count severity occurrences from displayed rows
+    const severityCounts: { [key: string]: number } = {};
+    
+    rows.forEach(row => {
+      const severity = row.severity?.toLowerCase();
+      if (severity) {
+        const capitalizedSeverity = severity.charAt(0).toUpperCase() + severity.slice(1);
+        severityCounts[capitalizedSeverity] = (severityCounts[capitalizedSeverity] || 0) + 1;
+      }
+    });
+
+    const total = Object.values(severityCounts).reduce((sum, count) => sum + count, 0);
+    
+    // Convert to chart data format
+    return Object.entries(severityCounts).map(([severity, count]) => ({
+      label: severity,
+      count,
+      percentage: total > 0 ? (count / total) * 100 : 0
+    }));
   };
 
+  // Recalculate whenever displayedRows changes
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    const newData = calculateSeverityDistribution(displayedRows);
+    setData(newData);
+  }, [displayedRows]);
 
   const chartConfig = {
     Critical: { label: "Critical", color: colorMap.Critical },
@@ -81,38 +80,6 @@ const SeverityDistribution = () => {
       })}
     </div>
   );
-
-  if (loading) {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          Severity Distribution
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Security alerts by severity level
-        </p>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          Severity Distribution
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Security alerts by severity level
-        </p>
-        <div className="flex items-center justify-center h-64">
-          <p className="text-red-500">Error: {error}</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!data.length) {
     return (
