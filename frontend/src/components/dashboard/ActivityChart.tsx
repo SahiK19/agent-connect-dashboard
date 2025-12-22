@@ -7,18 +7,73 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useState, useEffect } from 'react';
 
-const data = [
-  { time: "00:00", nids: 12, hids: 8, correlated: 4 },
-  { time: "04:00", nids: 19, hids: 12, correlated: 7 },
-  { time: "08:00", nids: 45, hids: 28, correlated: 18 },
-  { time: "12:00", nids: 67, hids: 42, correlated: 25 },
-  { time: "16:00", nids: 89, hids: 56, correlated: 32 },
-  { time: "20:00", nids: 34, hids: 22, correlated: 12 },
-  { time: "24:00", nids: 18, hids: 14, correlated: 6 },
-];
+interface ActivityData {
+  time: string;
+  nids: number;
+  hids: number;
+  correlated: number;
+}
+
+interface ApiResponse {
+  snort: Array<{ hour: number; count: number }>;
+  wazuh: Array<{ hour: number; count: number }>;
+  correlated: Array<{ hour: number; count: number }>;
+}
 
 export function ActivityChart() {
+  const [data, setData] = useState<ActivityData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch('http://18.142.200.244:5000/api/activity-overview');
+      if (!response.ok) throw new Error('Failed to fetch');
+      
+      const apiData: ApiResponse = await response.json();
+      
+      const normalizedData: ActivityData[] = [];
+      for (let hour = 0; hour < 24; hour += 4) {
+        const snortEntry = apiData.snort.find(item => item.hour === hour);
+        const wazuhEntry = apiData.wazuh.find(item => item.hour === hour);
+        const correlatedEntry = apiData.correlated.find(item => item.hour === hour);
+        
+        normalizedData.push({
+          time: `${hour.toString().padStart(2, '0')}:00`,
+          nids: snortEntry?.count || 0,
+          hids: wazuhEntry?.count || 0,
+          correlated: correlatedEntry?.count || 0
+        });
+      }
+      
+      setData(normalizedData);
+    } catch (error) {
+      console.error('Failed to fetch activity data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-foreground">Activity Overview</h3>
+          <p className="text-sm text-muted-foreground">Loading activity data...</p>
+        </div>
+        <div className="h-[300px] flex items-center justify-center">
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="rounded-xl border border-border bg-card p-6">
       <div className="mb-6">

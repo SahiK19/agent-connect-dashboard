@@ -28,6 +28,54 @@ def get_snort_logs():
     # Return sample data for now - replace with actual Snort data
     return jsonify([])
 
+@app.route('/api/activity-overview', methods=['GET'])
+def get_activity_overview():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        snort_query = """
+        SELECT HOUR(created_at) as hour, COUNT(*) as count 
+        FROM snort_logs 
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        GROUP BY HOUR(created_at)
+        """
+        
+        wazuh_query = """
+        SELECT HOUR(created_at) as hour, COUNT(*) as count 
+        FROM wazuh_logs 
+        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        GROUP BY HOUR(created_at)
+        """
+        
+        correlated_query = """
+        SELECT HOUR(created_at) as hour, COUNT(*) as count 
+        FROM security_logs 
+        WHERE correlated = 1 AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        GROUP BY HOUR(created_at)
+        """
+        
+        cursor.execute(snort_query)
+        snort_data = cursor.fetchall()
+        
+        cursor.execute(wazuh_query)
+        wazuh_data = cursor.fetchall()
+        
+        cursor.execute(correlated_query)
+        correlated_data = cursor.fetchall()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            "snort": snort_data,
+            "wazuh": wazuh_data,
+            "correlated": correlated_data
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/correlated-logs', methods=['GET'])
 def get_correlated_logs():
     try:

@@ -1,5 +1,6 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { StatsCard } from "@/components/dashboard/StatsCard";
+import { ActivityChart } from "@/components/dashboard/ActivityChart";
 import { ThreatDistribution } from "@/components/dashboard/ThreatDistribution";
 import { LogsTable } from "@/components/dashboard/LogsTable";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
@@ -127,7 +128,10 @@ export default function Dashboard() {
         </div>
 
         {/* Charts Row */}
-        <div className="grid lg:grid-cols-1 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ActivityChart />
+          </div>
           <ThreatDistribution />
         </div>
 
