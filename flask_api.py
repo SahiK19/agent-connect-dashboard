@@ -20,29 +20,13 @@ DB_CONFIG = {
 
 @app.route('/api/wazuh-logs', methods=['GET'])
 def get_wazuh_logs():
-    try:
-        conn = mysql.connector.connect(**DB_CONFIG)
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM wazuh_logs ORDER BY created_at DESC LIMIT 100")
-        logs = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return jsonify(logs)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Return sample data for now - replace with actual Wazuh data
+    return jsonify([])
 
 @app.route('/api/snort-logs', methods=['GET'])
 def get_snort_logs():
-    try:
-        conn = mysql.connector.connect(**DB_CONFIG)
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM snort_logs ORDER BY created_at DESC LIMIT 100")
-        logs = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return jsonify(logs)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    # Return sample data for now - replace with actual Snort data
+    return jsonify([])
 
 @app.route('/api/activity-overview', methods=['GET'])
 def get_activity_overview():
@@ -96,12 +80,7 @@ def get_activity_overview():
             "correlated": correlated_data
         }
         
-        from flask import make_response
-        resp = make_response(jsonify(response))
-        resp.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        resp.headers['Pragma'] = 'no-cache'
-        resp.headers['Expires'] = '0'
-        return resp
+        return jsonify(response)
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
