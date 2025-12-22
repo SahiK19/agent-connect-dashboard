@@ -154,7 +154,7 @@ const NIDSLogs = () => {
                       {log.dest_port || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Badge variant="outline" className="capitalize">
+                      <Badge variant="outline" className="capitalize text-black border-gray-300">
                         Snort
                       </Badge>
                     </td>

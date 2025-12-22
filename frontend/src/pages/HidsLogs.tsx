@@ -1,56 +1,64 @@
-import { useState, useEffect } from "react";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { LogsTable } from "@/components/dashboard/LogsTable";
-import { HidsAnalytics } from "@/components/dashboard/HidsAnalytics";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Search, Filter, Download, RefreshCw } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { RefreshCw } from 'lucide-react';
 
-export default function HidsLogs() {
-  const [logs, setLogs] = useState<any[]>([]);
+const HIDSLogs = () => {
+  const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [severityFilter, setSeverityFilter] = useState("all");
+  const [error, setError] = useState(null);
+
+  const API_URL = "http://18.142.200.244:5000/api/wazuh-logs";
+
+  const fetchLogs = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(API_URL);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setLogs(data);
+    } catch (err) {
+      setError(err.message);
+      console.error('Failed to fetch HIDS logs:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const response = await fetch('http://18.142.200.244:8080/api/dashboard-logs.php?source=wazuh&limit=100');
-        const data = await response.json();
-        console.log('HIDS Logs fetched:', data);
-        setLogs(data.logs || []);
-      } catch (error) {
-        console.error('Failed to fetch logs:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchLogs();
-    const interval = setInterval(fetchLogs, 30000);
+    
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(fetchLogs, 5000);
+    
     return () => clearInterval(interval);
   }, []);
 
-  const filteredLogs = logs.filter((log) => {
-    const matchesSearch = log.message?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSeverity = severityFilter === "all" || log.severity === severityFilter;
-    return matchesSearch && matchesSeverity;
-  });
+  const getSeverityColor = (severity) => {
+    switch (severity?.toLowerCase()) {
+      case 'critical': return 'bg-red-500 text-white';
+      case 'high': return 'bg-orange-500 text-white';
+      case 'medium': return 'bg-yellow-500 text-black';
+      case 'low': return 'bg-green-500 text-white';
+      default: return 'bg-gray-500 text-white';
+    }
+  };
 
-  if (loading) {
+  if (loading && logs.length === 0) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground">Loading Wazuh logs...</p>
+        <div className="p-6">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
+              <p className="text-gray-600">Loading analytics...</p>
+            </div>
           </div>
         </div>
       </DashboardLayout>
@@ -59,85 +67,105 @@ export default function HidsLogs() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">HIDS Logs</h1>
-            <p className="text-muted-foreground">Host-based Intrusion Detection System logs</p>
+            <h1 className="text-2xl font-bold text-gray-900">HIDS Logs</h1>
+            <p className="text-gray-600 mt-1">
+              {logs.length === 0 ? 'No Wazuh logs available' : `Showing ${logs.length} Wazuh logs`}
+            </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-2" />
-              Export
-            </Button>
-          </div>
+          <Button 
+            onClick={fetchLogs} 
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
 
-        {/* Analytics Section */}
-        <HidsAnalytics />
-
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl border border-border bg-card">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by host or description..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            Error: {error}
           </div>
-          <div className="flex gap-3">
-            <Select value={severityFilter} onValueChange={setSeverityFilter}>
-              <SelectTrigger className="w-[140px]">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Severity" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Severity</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="critical">Critical</SelectItem>
-              </SelectContent>
-            </Select>
+        )}
+
+        {logs.length === 0 && !loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No Wazuh logs available</p>
           </div>
-        </div>
-
-        {/* Results info */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Showing {filteredLogs.length} of {logs.length} Wazuh logs
-          </p>
-        </div>
-
-        {/* Logs Table */}
-        <LogsTable logs={filteredLogs} />
-
-        {/* Pagination */}
-        <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" size="sm" disabled>
-            Previous
-          </Button>
-          <Button variant="secondary" size="sm">
-            1
-          </Button>
-          <Button variant="outline" size="sm">
-            2
-          </Button>
-          <Button variant="outline" size="sm">
-            3
-          </Button>
-          <Button variant="outline" size="sm">
-            Next
-          </Button>
-        </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Timestamp
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Agent Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Agent IP
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Rule Level
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Source IP
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Destination IP
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Severity
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Message
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {logs.map((log, index) => (
+                  <tr key={log.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {log.timestamp || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {log.agent_name || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {log.agent_ip || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <Badge variant="outline" className="text-black border-gray-300">
+                        {log.rule_level || 'N/A'}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {log.source_ip || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {log.dest_ip || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getSeverityColor(log.severity)}`}>
+                        {log.severity || 'N/A'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">
+                      {log.message || 'N/A'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
-}
+};
+
+export default HIDSLogs;
