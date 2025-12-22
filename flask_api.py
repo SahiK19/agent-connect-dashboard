@@ -46,7 +46,7 @@ def get_snort_logs():
                 "id": r["id"],
                 "timestamp": r["timestamp"],
                 "source": "snort",
-                "agent_id": r.get("agent_id"),
+                "agent_id": r.get("agent_id") or "Unknown",
                 "source_ip": r["source_ip"],
                 "dest_ip": r["dest_ip"],
                 "source_port": r["source_port"],
