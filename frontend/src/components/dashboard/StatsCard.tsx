@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface StatsCardProps {
   title: string;
@@ -8,6 +9,7 @@ interface StatsCardProps {
   changeType?: "positive" | "negative" | "neutral";
   icon: LucideIcon;
   iconColor?: "primary" | "success" | "warning" | "destructive";
+  href?: string;
 }
 
 export function StatsCard({
@@ -17,6 +19,7 @@ export function StatsCard({
   changeType = "neutral",
   icon: Icon,
   iconColor = "primary",
+  href,
 }: StatsCardProps) {
   const iconColorClasses = {
     primary: "bg-primary/10 text-primary glow-primary",
@@ -31,8 +34,11 @@ export function StatsCard({
     neutral: "text-muted-foreground",
   };
 
-  return (
-    <div className="group relative rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-primary/30 hover:shadow-lg">
+  const cardContent = (
+    <div className={cn(
+      "group relative rounded-xl border border-border bg-card p-6 transition-all duration-300",
+      href ? "hover:border-primary/30 hover:shadow-lg cursor-pointer" : "hover:border-primary/30 hover:shadow-lg"
+    )}>
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -54,4 +60,10 @@ export function StatsCard({
       </div>
     </div>
   );
+
+  if (href) {
+    return <Link to={href}>{cardContent}</Link>;
+  }
+
+  return cardContent;
 }
