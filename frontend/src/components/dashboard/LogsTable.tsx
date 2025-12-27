@@ -10,6 +10,7 @@ interface Log {
   raw_json: any;
   created_at: string;
   correlated: boolean;
+  agent_id?: string;
 }
 
 interface LogsTableProps {
@@ -40,6 +41,9 @@ export function LogsTable({ logs }: LogsTableProps) {
                 Source
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Agent ID
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Severity
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -66,6 +70,9 @@ export function LogsTable({ logs }: LogsTableProps) {
                   <Badge variant="outline" className="capitalize">
                     {log.source}
                   </Badge>
+                </td>
+                <td className="px-4 py-3 text-sm font-mono text-muted-foreground whitespace-nowrap">
+                  {log.agent_id || "-"}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <Badge

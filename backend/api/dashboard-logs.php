@@ -40,7 +40,7 @@ try {
         }
     }
     
-    $sql = "SELECT id, timestamp, source, message, severity, raw_json, created_at, correlated 
+    $sql = "SELECT id, timestamp, source, message, severity, raw_json, created_at, correlated, agent_id 
             FROM security_logs 
             $whereClause 
             ORDER BY created_at DESC 
