@@ -90,14 +90,23 @@ export function useDashboardData(): DashboardData {
             isAgentConnected: true
           }));
         } else {
-          // Keep static data if no real data
-          setData(prev => ({ ...prev, isLoading: false }));
+          // No real data available - show empty logs
+          setData(prev => ({ 
+            ...prev, 
+            recentLogs: [],
+            isLoading: false 
+          }));
         }
         
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
-        // Keep static data on error
-        setData(prev => ({ ...prev, isLoading: false, error: null }));
+        // Set empty logs on error
+        setData(prev => ({ 
+          ...prev, 
+          recentLogs: [],
+          isLoading: false, 
+          error: null 
+        }));
       }
     };
 
