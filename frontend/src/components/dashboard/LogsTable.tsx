@@ -66,7 +66,15 @@ export function LogsTable({ logs }: LogsTableProps) {
                 <td className="px-4 py-3 text-sm font-mono text-muted-foreground whitespace-nowrap">
                   {(() => {
                     try {
-                      const date = new Date(log.created_at);
+                      let dateStr = log.created_at;
+                      if (!dateStr) return 'Invalid Date';
+                      
+                      // Normalize timestamp format for correlation logs
+                      if (typeof dateStr === 'string' && dateStr.includes(' UTC')) {
+                        dateStr = dateStr.replace(' ', 'T').replace(' UTC', 'Z');
+                      }
+                      
+                      const date = new Date(dateStr);
                       return isNaN(date.getTime()) ? 'Invalid Date' : date.toISOString().replace('T', ' ').replace('Z', ' GMT');
                     } catch {
                       return 'Invalid Date';

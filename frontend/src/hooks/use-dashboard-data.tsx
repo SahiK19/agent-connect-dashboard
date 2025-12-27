@@ -66,13 +66,18 @@ export function useDashboardData(): DashboardData {
         console.log('Processed logs:', allLogs); // Debug log
         
         if (allLogs.length > 0) {
-          // Use real data if available
-          const totalLogs = allLogs.length || 0;
-          const criticalAlerts = allLogs.filter(log => log.severity === 'critical').length;
-          const highAlerts = allLogs.filter(log => log.severity === 'high').length;
-          const threatsBlocked = allLogs.length; // All correlated events are threats
+          // Filter to only show correlation logs
+          const correlationLogs = allLogs.filter(log => 
+            log.source === 'correlation' || log.correlated === true
+          );
           
-          const recentLogs = allLogs.slice(0, 10);
+          // Use real data if available
+          const totalLogs = correlationLogs.length || 0;
+          const criticalAlerts = correlationLogs.filter(log => log.severity === 'critical').length;
+          const highAlerts = correlationLogs.filter(log => log.severity === 'high').length;
+          const threatsBlocked = correlationLogs.length; // All correlated events are threats
+          
+          const recentLogs = correlationLogs.slice(0, 10);
 
           console.log('Setting real logs data:', recentLogs); // Debug log
           setData(prev => ({
