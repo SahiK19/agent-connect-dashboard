@@ -6,7 +6,6 @@ import {
   Server,
   AlertTriangle,
   Download,
-  Key,
   LogOut,
   Menu,
   X,
@@ -21,7 +20,6 @@ const navItems = [
   { icon: Server, label: "HIDS Logs", path: "/hids-logs" },
   { icon: AlertTriangle, label: "Correlated Events", path: "/correlated-logs" },
   { icon: Download, label: "Install Agent", path: "/install-agent" },
-  { icon: Key, label: "API Token", path: "/api-token" },
 ];
 
 export function Sidebar() {

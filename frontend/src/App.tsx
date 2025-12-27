@@ -12,7 +12,6 @@ import NidsLogs from "./pages/NidsLogs";
 import HidsLogs from "./pages/HidsLogs";
 import CorrelatedLogs from "./pages/CorrelatedLogs";
 import InstallAgent from "./pages/InstallAgent";
-import ApiToken from "./pages/ApiToken";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,7 +32,6 @@ const App = () => (
             <Route path="/hids-logs" element={<ProtectedRoute><HidsLogs /></ProtectedRoute>} />
             <Route path="/correlated-logs" element={<ProtectedRoute><CorrelatedLogs /></ProtectedRoute>} />
             <Route path="/install-agent" element={<ProtectedRoute><InstallAgent /></ProtectedRoute>} />
-            <Route path="/api-token" element={<ProtectedRoute><ApiToken /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
