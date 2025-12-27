@@ -159,7 +159,7 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <StatsCard
             title="Correlated Events"
             value={correlatedStats.today.toLocaleString()}
@@ -169,28 +169,12 @@ export default function Dashboard() {
             iconColor="primary"
           />
           <StatsCard
-            title="Multi-Stage Attacks"
-            value={stats.threatsBlocked.toString()}
-            change={stats.threatsChange}
-            changeType="positive"
-            icon={Shield}
-            iconColor="success"
-          />
-          <StatsCard
             title="Critical Alerts"
             value={criticalCount.toString()}
             change={stats.alertsChange}
             changeType={criticalCount > 0 ? "negative" : "positive"}
             icon={AlertTriangle}
             iconColor="destructive"
-          />
-          <StatsCard
-            title="Active Agents"
-            value={stats.activeAgents}
-            change={isAgentConnected ? "Agent online" : "Agent offline"}
-            changeType={isAgentConnected ? "positive" : "negative"}
-            icon={Server}
-            iconColor={isAgentConnected ? "success" : "destructive"}
           />
         </div>
 

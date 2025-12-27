@@ -40,9 +40,13 @@ def get_snort_logs():
         cursor.execute(query)
         results = cursor.fetchall()
         
+        print(f"DEBUG: Found {len(results)} snort logs")  # Debug log
+        if results:
+            print(f"DEBUG: First result: {results[0]}")  # Debug log
+        
         logs = []
         for r in results:
-            logs.append({
+            log_entry = {
                 "id": r["id"],
                 "timestamp": r["timestamp"],
                 "source": "snort",
@@ -53,7 +57,9 @@ def get_snort_logs():
                 "dest_port": r["dest_port"],
                 "severity": r["severity"],
                 "signature": r["signature"]
-            })
+            }
+            print(f"DEBUG: Processing log {r['id']}, agent_id: {r.get('agent_id')}")  # Debug log
+            logs.append(log_entry)
         
         cursor.close()
         conn.close()
@@ -61,6 +67,7 @@ def get_snort_logs():
         return jsonify(logs)
         
     except Exception as e:
+        print(f"DEBUG: Error in snort-logs: {str(e)}")  # Debug log
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/activity-overview', methods=['GET'])
