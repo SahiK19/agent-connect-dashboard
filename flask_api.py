@@ -213,7 +213,31 @@ def get_correlated_stats():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/correlated-logs', methods=['GET'])
+@app.route('/api/dashboard/active-correlated-agents', methods=['GET'])
+def get_active_correlated_agents():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT COUNT(DISTINCT agent_id) as active_agents 
+        FROM security_logs 
+        WHERE correlated = 1 AND agent_id IS NOT NULL
+        AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        """
+        
+        cursor.execute(query)
+        result = cursor.fetchone()
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify({'active_agents': result['active_agents'] if result else 0})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/correlated-logs', methods=['GET']))
 def get_correlated_logs():
     try:
         # Connect to database
