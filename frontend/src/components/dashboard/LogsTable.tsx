@@ -66,8 +66,8 @@ export function LogsTable({ logs }: LogsTableProps) {
                 <td className="px-4 py-3 text-sm font-mono text-muted-foreground whitespace-nowrap">
                   {(() => {
                     try {
-                      let dateStr = log.created_at;
-                      if (!dateStr) return 'Invalid Date';
+                      let dateStr = log.timestamp || log.created_at;
+                      if (!dateStr) return '—';
                       
                       // Normalize timestamp format for correlation logs
                       if (typeof dateStr === 'string' && dateStr.includes(' UTC')) {
@@ -75,9 +75,9 @@ export function LogsTable({ logs }: LogsTableProps) {
                       }
                       
                       const date = new Date(dateStr);
-                      return isNaN(date.getTime()) ? 'Invalid Date' : date.toISOString().replace('T', ' ').replace('Z', ' GMT');
+                      return isNaN(date.getTime()) ? '—' : date.toISOString().replace('T', ' ').replace('Z', ' GMT');
                     } catch {
-                      return 'Invalid Date';
+                      return '—';
                     }
                   })()}
                 </td>
@@ -130,8 +130,14 @@ export function LogsTable({ logs }: LogsTableProps) {
                       }
                     }
                     
+                    // If message is empty, provide fallback
+                    if (!message) {
+                      const agentId = log.agent_id || 'unknown';
+                      message = `Correlated security event detected on ${agentId}`;
+                    }
+                    
                     console.log('Dashboard message found:', message);
-                    return message || 'No description available';
+                    return message;
                   })()}
                 </td>
               </tr>
