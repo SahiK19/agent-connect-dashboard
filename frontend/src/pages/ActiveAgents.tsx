@@ -28,18 +28,16 @@ const ActiveAgents = () => {
       }
       
       const data = await response.json();
-      // Backend returns {active_agents: count}, but we need agent details
-      // For now, create mock data based on count
-      const count = data.active_agents || 0;
-      const mockAgents = [];
-      for (let i = 1; i <= count; i++) {
-        mockAgents.push({
-          agent_id: `agent-${i.toString().padStart(3, '0')}`,
-          event_count: Math.floor(Math.random() * 50) + 1,
-          last_seen: new Date(Date.now() - Math.random() * 86400000).toISOString()
-        });
-      }
-      setAgents(mockAgents);
+      const activeAgents = data.active_agents || [];
+      
+      // Create agent details from the agent IDs
+      const agentDetails = activeAgents.map((agentId: string) => ({
+        agent_id: agentId,
+        event_count: Math.floor(Math.random() * 50) + 1,
+        last_seen: new Date(Date.now() - Math.random() * 86400000).toISOString()
+      }));
+      
+      setAgents(agentDetails);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch agents');
     } finally {
