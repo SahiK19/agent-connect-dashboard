@@ -213,8 +213,8 @@ def get_correlated_stats():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/dashboard/active-correlated-agents', methods=['GET'])
-def get_active_correlated_agents():
+@app.route('/api/dashboard/active-agents-count', methods=['GET'])
+def get_active_agents_count():
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
@@ -233,6 +233,42 @@ def get_active_correlated_agents():
         conn.close()
         
         return jsonify({'active_agents': result['active_agents'] if result else 0})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/dashboard/active-correlated-agents', methods=['GET']))
+def get_active_correlated_agents():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT agent_id, COUNT(*) as correlated_events, MAX(created_at) as last_seen
+        FROM security_logs 
+        WHERE correlated = 1 AND agent_id IS NOT NULL
+        AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+        GROUP BY agent_id
+        ORDER BY correlated_events DESC
+        """
+        
+        cursor.execute(query)
+        agents = cursor.fetchall()
+        
+        # Format response for Active Agents page
+        agent_list = []
+        for agent in agents:
+            agent_list.append({
+                'agent_id': agent['agent_id'],
+                'correlated_events': agent['correlated_events'],
+                'last_seen': agent['last_seen'].isoformat() if agent['last_seen'] else None,
+                'status': 'ACTIVE'
+            })
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(agent_list)
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
