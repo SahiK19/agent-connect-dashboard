@@ -53,12 +53,7 @@ export function useDashboardData(): DashboardData {
         setData(prev => ({ ...prev, isLoading: true, error: null }));
         
         const apiUrl = import.meta.env.VITE_API_URL || 'http://18.142.200.244:8080';
-        const response = await fetch(`${apiUrl}/api/dashboard-logs.php?source=correlated&limit=50&_t=${Date.now()}`, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
-        });
+        const response = await fetch(`${apiUrl}/api/dashboard-logs.php?source=correlated&limit=50&_t=${Date.now()}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
