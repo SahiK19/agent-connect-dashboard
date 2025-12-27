@@ -17,7 +17,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
-  const { stats, recentLogs, isLoading, error, isAgentConnected } =
+  const { stats, recentLogs, correlatedLogs, isLoading, error, isAgentConnected } =
     useDashboardData();
 
   // State for critical alerts count - fetched from dedicated API endpoint
@@ -233,7 +233,7 @@ export default function Dashboard() {
           <div className="lg:col-span-2">
             <ActivityChart />
           </div>
-          <SeverityDistribution displayedRows={recentLogs} />
+          <SeverityDistribution displayedRows={correlatedLogs || []} />
         </div>
 
         {/* Recent Logs */}
@@ -248,7 +248,7 @@ export default function Dashboard() {
               </Button>
             </Link>
           </div>
-          <LogsTable logs={recentLogs} />
+          <LogsTable logs={correlatedLogs || []} />
         </div>
       </div>
     </DashboardLayout>

@@ -25,6 +25,7 @@ interface LogEntry {
 interface DashboardData {
   stats: DashboardStats;
   recentLogs: LogEntry[];
+  correlatedLogs: LogEntry[];
   isLoading: boolean;
   error: string | null;
   isAgentConnected: boolean;
@@ -42,6 +43,7 @@ export function useDashboardData(): DashboardData {
       alertsChange: '+3 new alerts'
     },
     recentLogs: [],
+    correlatedLogs: [],
     isLoading: false,
     error: null,
     isAgentConnected: true
@@ -67,9 +69,9 @@ export function useDashboardData(): DashboardData {
         
         if (allLogs.length > 0) {
           // Filter to only show correlation logs
-          const correlationLogs = allLogs.filter(log => 
-            log.correlated === true
-          );
+          const correlationLogs = Array.isArray(allLogs) ? allLogs.filter(log => 
+            log.correlated === 1 || log.correlated === true
+          ) : [];
           
           // Use real data if available
           const totalLogs = correlationLogs.length || 0;
@@ -92,6 +94,7 @@ export function useDashboardData(): DashboardData {
               alertsChange: `+${criticalAlerts} new alerts`
             },
             recentLogs,
+            correlatedLogs: correlationLogs,
             isLoading: false,
             error: null,
             isAgentConnected: true
@@ -102,6 +105,7 @@ export function useDashboardData(): DashboardData {
           setData(prev => ({ 
             ...prev, 
             recentLogs: [],
+            correlatedLogs: [],
             isLoading: false 
           }));
         }
@@ -112,6 +116,7 @@ export function useDashboardData(): DashboardData {
         setData(prev => ({ 
           ...prev, 
           recentLogs: [],
+          correlatedLogs: [],
           isLoading: false, 
           error: null 
         }));

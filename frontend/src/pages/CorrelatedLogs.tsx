@@ -6,7 +6,7 @@ import { LogsTable } from '@/components/dashboard/LogsTable';
 import { useDashboardData } from '@/hooks/use-dashboard-data';
 
 const CorrelatedLogs = () => {
-  const { recentLogs, isLoading, error } = useDashboardData();
+  const { correlatedLogs, isLoading, error } = useDashboardData();
 
   if (isLoading) {
     return (
@@ -30,7 +30,7 @@ const CorrelatedLogs = () => {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Correlated Security Events</h1>
             <p className="text-gray-600 mt-1">
-              {recentLogs.length === 0 ? 'No correlated attacks detected' : `Showing ${recentLogs.length} correlated attacks`}
+              {correlatedLogs.length === 0 ? 'No correlated attacks detected' : `Showing ${correlatedLogs.length} correlated attacks`}
             </p>
           </div>
         </div>
@@ -41,15 +41,15 @@ const CorrelatedLogs = () => {
           </div>
         )}
 
-        {recentLogs.length === 0 && !isLoading ? (
+        {correlatedLogs.length === 0 && !isLoading ? (
           <div className="text-center py-12">
             <div className="bg-green-50 border border-green-200 rounded-lg p-8">
-              <p className="text-green-700 text-lg font-medium">No correlated attacks detected</p>
+              <p className="text-green-700 text-lg font-medium">No correlated events found</p>
               <p className="text-green-600 text-sm mt-2">Your system is secure</p>
             </div>
           </div>
         ) : (
-          <LogsTable logs={recentLogs} />
+          <LogsTable logs={correlatedLogs || []} />
         )}
       </div>
     </DashboardLayout>
