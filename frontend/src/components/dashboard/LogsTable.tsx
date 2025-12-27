@@ -64,7 +64,7 @@ export function LogsTable({ logs }: LogsTableProps) {
                   {log.id}
                 </td>
                 <td className="px-4 py-3 text-sm font-mono text-muted-foreground whitespace-nowrap">
-                  {new Date(log.created_at).toLocaleString()}
+                  {new Date(log.created_at).toISOString().replace('T', ' ').replace('Z', ' GMT')}
                 </td>
                 <td className="px-4 py-3 text-sm font-mono text-foreground whitespace-nowrap">
                   <Badge variant="outline" className="capitalize">
