@@ -3,10 +3,10 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import { LogsTable } from '@/components/dashboard/LogsTable';
-import { useDashboardData } from '@/hooks/use-dashboard-data';
+import { useCorrelatedEvents } from '@/hooks/use-correlated-events';
 
 const CorrelatedLogs = () => {
-  const { correlatedLogs, isLoading, error } = useDashboardData();
+  const { correlatedLogs, isLoading, error } = useCorrelatedEvents();
 
   if (isLoading) {
     return (

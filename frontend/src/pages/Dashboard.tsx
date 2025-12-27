@@ -4,6 +4,7 @@ import { ActivityChart } from "@/components/dashboard/ActivityChart";
 import SeverityDistribution from "@/components/dashboard/SeverityDistribution";
 import { LogsTable } from "@/components/dashboard/LogsTable";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
+import { useCorrelatedEvents } from "@/hooks/use-correlated-events";
 import { useState, useEffect } from "react";
 import {
   Shield,
@@ -17,8 +18,9 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
-  const { stats, recentLogs, correlatedLogs, isLoading, error, isAgentConnected } =
+  const { stats, recentLogs, isLoading, error, isAgentConnected } =
     useDashboardData();
+  const { correlatedLogs } = useCorrelatedEvents();
 
   // State for critical alerts count - fetched from dedicated API endpoint
   const [criticalCount, setCriticalCount] = useState(0);
