@@ -4,7 +4,7 @@ import { ActivityChart } from "@/components/dashboard/ActivityChart";
 import SeverityDistribution from "@/components/dashboard/SeverityDistribution";
 import { LogsTable } from "@/components/dashboard/LogsTable";
 import { useDashboardData } from "@/hooks/use-dashboard-data";
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Shield,
   AlertTriangle,
@@ -17,37 +17,66 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
-  const { stats, recentLogs, isLoading, error, isAgentConnected } = useDashboardData();
-  
+  const { stats, recentLogs, isLoading, error, isAgentConnected } =
+    useDashboardData();
+
   // State for critical alerts count - fetched from dedicated API endpoint
   const [criticalCount, setCriticalCount] = useState(0);
-  
+
   // State for correlated events stats - fetched from dedicated API endpoint
   const [correlatedStats, setCorrelatedStats] = useState({
     today: 0,
     yesterday: 0,
-    percentage_change: 0
+    percentage_change: 0,
   });
+
+  // State for active correlated agents - fetched from dedicated API endpoint
+  const [activeCorrelatedAgents, setActiveCorrelatedAgents] = useState(0);
+
+  // Fetch active correlated agents from /api/dashboard/active-correlated-agents
+  const fetchActiveCorrelatedAgents = async () => {
+    try {
+      const response = await fetch(
+        "http://18.142.200.244:5000/api/dashboard/active-correlated-agents",
+        {
+          cache: "no-store",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setActiveCorrelatedAgents(data.active_agents || 0);
+    } catch (err) {
+      console.warn("Failed to fetch active correlated agents:", err);
+      // Keep previous value on error
+    }
+  };
 
   // Fetch correlated events stats from /api/dashboard/correlated-stats
   const fetchCorrelatedStats = async () => {
     try {
-      const response = await fetch('http://18.142.200.244:5000/api/dashboard/correlated-stats', { 
-        cache: 'no-store' 
-      });
-      
+      const response = await fetch(
+        "http://18.142.200.244:5000/api/dashboard/correlated-stats",
+        {
+          cache: "no-store",
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setCorrelatedStats({
         today: data.today || 0,
         yesterday: data.yesterday || 0,
-        percentage_change: data.percentage_change || 0
+        percentage_change: data.percentage_change || 0,
       });
     } catch (err) {
-      console.warn('Failed to fetch correlated stats:', err);
+      console.warn("Failed to fetch correlated stats:", err);
       // Keep previous values on error
     }
   };
@@ -55,33 +84,39 @@ export default function Dashboard() {
   // Fetch critical alerts count from /api/dashboard/critical-count
   const fetchCriticalCount = async () => {
     try {
-      const response = await fetch('http://18.142.200.244:5000/api/dashboard/critical-count', { 
-        cache: 'no-store' 
-      });
-      
+      const response = await fetch(
+        "http://18.142.200.244:5000/api/dashboard/critical-count",
+        {
+          cache: "no-store",
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setCriticalCount(data.critical || 0);
     } catch (err) {
-      console.warn('Failed to fetch critical count:', err);
+      console.warn("Failed to fetch critical count:", err);
       // Keep previous value on error
     }
   };
 
-  // Auto-refresh critical count every 15 seconds and correlated stats every 10 minutes
+  // Auto-refreshh critical count every 15 seconds, correlated stats every 10 minutes, and active agents every 60 seconds
   useEffect(() => {
     fetchCriticalCount();
     fetchCorrelatedStats();
-    
+    fetchActiveCorrelatedAgents();
+
     const criticalInterval = setInterval(fetchCriticalCount, 15000);
     const correlatedInterval = setInterval(fetchCorrelatedStats, 600000); // 10 minutes
-    
+    const agentsInterval = setInterval(fetchActiveCorrelatedAgents, 60000); // 60 seconds
+
     return () => {
       clearInterval(criticalInterval);
       clearInterval(correlatedInterval);
+      clearInterval(agentsInterval);
     };
   }, []);
 
@@ -145,7 +180,9 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Correlated Dashboard</h1>
+            <h1 className="text-2xl font-bold text-foreground">
+              Correlated Dashboard
+            </h1>
             <p className="text-muted-foreground">
               Multi-stage attack detection and correlation analysis.
             </p>
@@ -159,12 +196,16 @@ export default function Dashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatsCard
             title="Correlated Events"
             value={correlatedStats.today.toLocaleString()}
-            change={`${correlatedStats.percentage_change >= 0 ? '+' : ''}${correlatedStats.percentage_change}% from yesterday`}
-            changeType={correlatedStats.percentage_change >= 0 ? "positive" : "negative"}
+            change={`${correlatedStats.percentage_change >= 0 ? "+" : ""}${
+              correlatedStats.percentage_change
+            }% from yesterday`}
+            changeType={
+              correlatedStats.percentage_change >= 0 ? "positive" : "negative"
+            }
             icon={Activity}
             iconColor="primary"
           />
@@ -175,6 +216,14 @@ export default function Dashboard() {
             changeType={criticalCount > 0 ? "negative" : "positive"}
             icon={AlertTriangle}
             iconColor="destructive"
+          />
+          <StatsCard
+            title="Active Correlated Agents"
+            value={activeCorrelatedAgents.toString()}
+            change="Last 24 hours"
+            changeType="neutral"
+            icon={Server}
+            iconColor="success"
           />
         </div>
 

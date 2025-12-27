@@ -10,7 +10,7 @@ interface Log {
   raw_json: any;
   created_at: string;
   correlated: boolean;
-  agent_id?: string;
+  agent_id?: string | null;
 }
 
 interface LogsTableProps {
@@ -72,7 +72,7 @@ export function LogsTable({ logs }: LogsTableProps) {
                   </Badge>
                 </td>
                 <td className="px-4 py-3 text-sm font-mono text-muted-foreground whitespace-nowrap">
-                  {log.agent_id || "-"}
+                  <span className="font-mono">{log.agent_id || "-"}</span>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <Badge

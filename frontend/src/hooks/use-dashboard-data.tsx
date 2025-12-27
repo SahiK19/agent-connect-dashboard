@@ -19,6 +19,7 @@ interface LogEntry {
   raw_json: any;
   created_at: string;
   correlated: boolean;
+  agent_id?: string | null;
 }
 
 interface DashboardData {
