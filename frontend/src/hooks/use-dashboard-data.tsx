@@ -41,44 +41,7 @@ export function useDashboardData(): DashboardData {
       threatsChange: '234 blocked today',
       alertsChange: '+3 new alerts'
     },
-    recentLogs: [
-      {
-        id: '1',
-        timestamp: new Date().toLocaleString(),
-        sourceIp: '192.168.100.80',
-        destIp: '192.168.100.255',
-        eventType: 'Snort IDS',
-        severity: 'high',
-        description: 'MISC UPnP malformed advertisement detected'
-      },
-      {
-        id: '2',
-        timestamp: new Date(Date.now() - 300000).toLocaleString(),
-        sourceIp: '203.45.67.89',
-        destIp: '10.0.0.25',
-        eventType: 'Wazuh HIDS',
-        severity: 'critical',
-        description: 'Multiple failed SSH login attempts'
-      },
-      {
-        id: '3',
-        timestamp: new Date(Date.now() - 600000).toLocaleString(),
-        sourceIp: '172.16.0.45',
-        destIp: '10.0.0.100',
-        eventType: 'Correlation',
-        severity: 'medium',
-        description: 'Suspicious traffic pattern correlation'
-      },
-      {
-        id: '4',
-        timestamp: new Date(Date.now() - 900000).toLocaleString(),
-        sourceIp: '192.168.1.22',
-        destIp: '10.0.0.75',
-        eventType: 'Network Scan',
-        severity: 'low',
-        description: 'Port scan activity detected'
-      }
-    ],
+    recentLogs: [],
     isLoading: false,
     error: null,
     isAgentConnected: true
