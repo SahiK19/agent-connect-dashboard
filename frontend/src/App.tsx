@@ -33,7 +33,7 @@ const App = () => (
             <Route path="/hids-logs" element={<ProtectedRoute><HidsLogs /></ProtectedRoute>} />
             <Route path="/correlated-logs" element={<ProtectedRoute><CorrelatedLogs /></ProtectedRoute>} />
             <Route path="/install-agent" element={<ProtectedRoute><InstallAgent /></ProtectedRoute>} />
-            <Route path="/active-agents" element={<ProtectedRoute><ActiveAgents /></ProtectedRoute>} />
+            <Route path="/agents/active" element={<ProtectedRoute><ActiveAgents /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

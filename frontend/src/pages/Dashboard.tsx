@@ -224,7 +224,7 @@ export default function Dashboard() {
             changeType="neutral"
             icon={Server}
             iconColor="success"
-            href="/active-agents"
+            href="/agents/active"
           />
         </div>
 
