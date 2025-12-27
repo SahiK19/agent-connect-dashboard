@@ -52,8 +52,7 @@ export function useDashboardData(): DashboardData {
       try {
         setData(prev => ({ ...prev, isLoading: true, error: null }));
         
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://18.142.200.244:8080';
-        const response = await fetch(`${apiUrl}/api/dashboard-logs.php?source=correlated&limit=50&_t=${Date.now()}`);
+        const response = await fetch(`http://18.142.200.244:5000/api/correlated-logs?_t=${Date.now()}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -63,12 +62,12 @@ export function useDashboardData(): DashboardData {
         console.log('Dashboard API response:', result); // Debug log
         
         // Process logs data
-        const allLogs = result.logs || [];
+        const allLogs = result || [];
         console.log('Processed logs:', allLogs); // Debug log
         
         if (allLogs.length > 0) {
           // Use real data if available
-          const totalLogs = result.total || 0;
+          const totalLogs = allLogs.length || 0;
           const criticalAlerts = allLogs.filter(log => log.severity === 'critical').length;
           const highAlerts = allLogs.filter(log => log.severity === 'high').length;
           const threatsBlocked = allLogs.length; // All correlated events are threats
