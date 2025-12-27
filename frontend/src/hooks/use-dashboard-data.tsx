@@ -53,16 +53,23 @@ export function useDashboardData(): DashboardData {
         setData(prev => ({ ...prev, isLoading: true, error: null }));
         
         const apiUrl = import.meta.env.VITE_API_URL || 'http://18.142.200.244:8080';
-        const response = await fetch(`${apiUrl}/api/dashboard-logs.php?source=correlated&limit=50`);
+        const response = await fetch(`${apiUrl}/api/dashboard-logs.php?source=correlated&limit=50&_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const result = await response.json();
+        console.log('Dashboard API response:', result); // Debug log
         
         // Process logs data
         const allLogs = result.logs || [];
+        console.log('Processed logs:', allLogs); // Debug log
         
         if (allLogs.length > 0) {
           // Use real data if available
@@ -73,6 +80,7 @@ export function useDashboardData(): DashboardData {
           
           const recentLogs = allLogs.slice(0, 10);
 
+          console.log('Setting real logs data:', recentLogs); // Debug log
           setData(prev => ({
             ...prev,
             stats: {
@@ -90,6 +98,7 @@ export function useDashboardData(): DashboardData {
             isAgentConnected: true
           }));
         } else {
+          console.log('No logs data, setting empty array'); // Debug log
           // No real data available - show empty logs
           setData(prev => ({ 
             ...prev, 
