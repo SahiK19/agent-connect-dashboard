@@ -28,7 +28,7 @@ const ActiveAgents = () => {
       }
       
       const data = await response.json();
-      setAgents(data);
+      setAgents(Array.isArray(data.active_agents) ? data.active_agents : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch agents');
     } finally {
