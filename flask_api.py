@@ -237,7 +237,7 @@ def get_active_correlated_agents():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/correlated-logs', methods=['GET']))
+@app.route('/api/correlated-logs', methods=['GET'])
 def get_correlated_logs():
     try:
         # Connect to database
