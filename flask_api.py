@@ -244,7 +244,7 @@ def get_correlated_logs():
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
         
-        # Get correlated logs
+        # Get correlated logss
         query = """
         SELECT id, timestamp, source, message, severity, raw_json, created_at 
         FROM security_logs 
