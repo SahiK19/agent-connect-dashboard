@@ -40,7 +40,7 @@ export function LogsTable({ logs }: LogsTableProps) {
         stage2: rawData?.stage2 || {},
         src_ip: rawData?.src_ip || 'N/A',
         agent_id: rawData?.agent_id || log.agent_id || 'N/A',
-        time_difference: rawData?.time_difference || 'N/A'
+        time_difference: rawData?.time_difference_seconds ? `${rawData.time_difference_seconds}s` : rawData?.time_difference || 'N/A'
       };
     } catch {
       return {
@@ -140,34 +140,32 @@ export function LogsTable({ logs }: LogsTableProps) {
                 </td>
                 <td className="px-4 py-3 text-sm text-muted-foreground max-w-md truncate">
                   {(() => {
-                    console.log('Dashboard log object:', log); // Debug each log
                     let message = log.message;
                     
-                    // If message is empty, try to extract from raw_json
+                    // Extract message from raw_json if message is empty
                     if (!message && log.raw_json) {
                       try {
                         const rawData = typeof log.raw_json === 'string' ? JSON.parse(log.raw_json) : log.raw_json;
+                        
+                        // Priority order: message > correlation_type > constructed message from stages
                         if (rawData.message) {
                           message = rawData.message;
                         } else if (rawData.correlation_type) {
-                          message = rawData.correlation_type;
+                          message = rawData.correlation_type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
                         } else if (rawData.stage1 && rawData.stage2) {
-                          const stage1 = rawData.stage1.wazuh_alert || 'Unknown event';
-                          const stage2 = rawData.stage2.wazuh_alert || 'Unknown event';
-                          message = `Correlated events: ${stage1} → ${stage2}`;
+                          message = `${rawData.stage1.type || 'Event'} → ${rawData.stage2.type || 'Event'}`;
                         }
                       } catch (e) {
                         console.error('Error parsing raw_json:', e);
                       }
                     }
                     
-                    // If message is empty, provide fallback
+                    // Final fallback
                     if (!message) {
                       const agentId = log.agent_id || 'unknown';
                       message = `Correlated security event detected on ${agentId}`;
                     }
                     
-                    console.log('Dashboard message found:', message);
                     return message;
                   })()}
                 </td>
