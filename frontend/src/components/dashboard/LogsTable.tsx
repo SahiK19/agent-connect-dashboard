@@ -64,7 +64,14 @@ export function LogsTable({ logs }: LogsTableProps) {
                   {log.id}
                 </td>
                 <td className="px-4 py-3 text-sm font-mono text-muted-foreground whitespace-nowrap">
-                  {new Date(log.created_at).toISOString().replace('T', ' ').replace('Z', ' GMT')}
+                  {(() => {
+                    try {
+                      const date = new Date(log.created_at);
+                      return isNaN(date.getTime()) ? 'Invalid Date' : date.toISOString().replace('T', ' ').replace('Z', ' GMT');
+                    } catch {
+                      return 'Invalid Date';
+                    }
+                  })()}
                 </td>
                 <td className="px-4 py-3 text-sm font-mono text-foreground whitespace-nowrap">
                   <Badge variant="outline" className="capitalize">
