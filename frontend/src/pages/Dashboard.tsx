@@ -37,7 +37,7 @@ export default function Dashboard() {
   const fetchActiveCorrelatedAgents = async () => {
     try {
       const response = await fetch(
-        "http://18.142.200.244:5000/api/dashboard/active-agents-count",
+        "http://18.142.200.244:5000/api/dashboard/active-correlated-agents",
         {
           cache: "no-store",
         }

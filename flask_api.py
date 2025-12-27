@@ -237,43 +237,80 @@ def get_active_agents_count():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/dashboard/active-correlated-agents', methods=['GET']))
+@app.route('/api/dashboard/active-correlated-agents', methods=['GET'])
 def get_active_correlated_agents():
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor(dictionary=True)
         
         query = """
-        SELECT agent_id, COUNT(*) as correlated_events, MAX(created_at) as last_seen
+        SELECT COUNT(DISTINCT agent_id) as active_agents 
         FROM security_logs 
         WHERE correlated = 1 AND agent_id IS NOT NULL
         AND created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR)
-        GROUP BY agent_id
-        ORDER BY correlated_events DESC
         """
         
         cursor.execute(query)
-        agents = cursor.fetchall()
-        
-        # Format response for Active Agents page
-        agent_list = []
-        for agent in agents:
-            agent_list.append({
-                'agent_id': agent['agent_id'],
-                'correlated_events': agent['correlated_events'],
-                'last_seen': agent['last_seen'].isoformat() if agent['last_seen'] else None,
-                'status': 'ACTIVE'
-            })
+        result = cursor.fetchone()
         
         cursor.close()
         conn.close()
         
-        return jsonify(agent_list)
+        return jsonify({'active_agents': result['active_agents'] if result else 0})
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/correlated-logs', methods=['GET'])
+@app.route('/api/logs', methods=['GET'])
+def get_logs():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT id, timestamp, source, message, severity, raw_json, created_at, agent_id
+        FROM security_logs 
+        WHERE correlated = 1 
+        ORDER BY created_at DESC 
+        LIMIT 50
+        """
+        
+        cursor.execute(query)
+        logs = cursor.fetchall()
+        
+        processed_logs = []
+        for log in logs:
+            processed_log = dict(log)
+            processed_log['correlated'] = True
+            
+            if not processed_log.get('message') and processed_log.get('raw_json'):
+                try:
+                    raw_data = json.loads(processed_log['raw_json'])
+                    if raw_data.get('message'):
+                        processed_log['message'] = raw_data['message']
+                    elif raw_data.get('correlation_type'):
+                        processed_log['message'] = raw_data['correlation_type']
+                    elif raw_data.get('stage1') and raw_data.get('stage2'):
+                        stage1 = raw_data['stage1'].get('wazuh_alert', 'Unknown event')
+                        stage2 = raw_data['stage2'].get('wazuh_alert', 'Unknown event')
+                        processed_log['message'] = f"Correlated events: {stage1} → {stage2}"
+                except:
+                    pass
+            
+            if not processed_log.get('message'):
+                processed_log['message'] = 'No description available'
+                
+            processed_logs.append(processed_log)
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(processed_logs)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/correlated-logs', methods=['GET']))
 def get_correlated_logs():
     try:
         # Connect to database

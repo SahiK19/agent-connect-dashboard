@@ -52,7 +52,7 @@ export function useDashboardData(): DashboardData {
       try {
         setData(prev => ({ ...prev, isLoading: true, error: null }));
         
-        const response = await fetch(`http://18.142.200.244:5000/api/correlated-logs?_t=${Date.now()}`);
+        const response = await fetch(`http://18.142.200.244:5000/api/logs?_t=${Date.now()}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
