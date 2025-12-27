@@ -68,7 +68,7 @@ export function useDashboardData(): DashboardData {
         if (allLogs.length > 0) {
           // Filter to only show correlation logs
           const correlationLogs = allLogs.filter(log => 
-            log.source === 'correlation' || log.correlated === true
+            log.correlated === true
           );
           
           // Use real data if available
