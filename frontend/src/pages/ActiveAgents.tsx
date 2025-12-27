@@ -19,7 +19,7 @@ const ActiveAgents = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('http://18.142.200.244:5000/api/agents/active', {
+      const response = await fetch('http://18.142.200.244:5000/api/dashboard/active-correlated-agents', {
         cache: 'no-store'
       });
       
