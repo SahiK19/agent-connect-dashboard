@@ -121,13 +121,6 @@ export default function Login() {
             <Button type="submit" variant="hero" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
-
-            <p className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/register" className="text-primary hover:underline">
-                Create one
-              </Link>
-            </p>
           </form>
         </CardContent>
       </Card>

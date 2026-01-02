@@ -67,9 +67,6 @@ export default function Index() {
               <Link to="/login">
                 <Button variant="ghost">Login</Button>
               </Link>
-              <Link to="/register">
-                <Button variant="hero">Get Started</Button>
-              </Link>
             </div>
           </div>
         </div>
@@ -110,15 +107,10 @@ export default function Index() {
               className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in"
               style={{ animationDelay: "0.3s" }}
             >
-              <Link to="/register">
-                <Button variant="hero" size="xl">
-                  Start Free Trial
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
-              </Link>
               <Link to="/login">
-                <Button variant="outline" size="xl">
-                  View Demo
+                <Button variant="hero" size="xl">
+                  Access Dashboard
+                  <ChevronRight className="w-5 h-5" />
                 </Button>
               </Link>
             </div>
@@ -226,9 +218,9 @@ export default function Index() {
                 Get started in minutes with our easy-to-deploy agents and
                 intuitive dashboard.
               </p>
-              <Link to="/register">
+              <Link to="/login">
                 <Button variant="hero" size="xl">
-                  Create Free Account
+                  Access Dashboard
                   <ChevronRight className="w-5 h-5" />
                 </Button>
               </Link>

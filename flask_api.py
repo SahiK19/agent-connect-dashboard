@@ -18,6 +18,46 @@ DB_CONFIG = {
     'database': 'security_logs'
 }
 
+@app.route('/api/hids-logs', methods=['GET'])
+def get_hids_logs():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+        SELECT id, timestamp, agent_name, agent_ip, rule_level, source_ip, 
+               dest_ip, severity, rule_description, created_at
+        FROM wazuh_logs 
+        ORDER BY created_at DESC 
+        LIMIT 100
+        """
+        
+        cursor.execute(query)
+        results = cursor.fetchall()
+        
+        logs = []
+        for r in results:
+            log_entry = {
+                "id": r["id"],
+                "timestamp": r["timestamp"],
+                "agent_name": r["agent_name"],
+                "agent_ip": r["agent_ip"],
+                "rule_level": r["rule_level"],
+                "source_ip": r["source_ip"],
+                "dest_ip": r["dest_ip"],
+                "severity": r["severity"],
+                "message": r["rule_description"]
+            }
+            logs.append(log_entry)
+        
+        cursor.close()
+        conn.close()
+        
+        return jsonify(logs)
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/wazuh-logs', methods=['GET'])
 def get_wazuh_logs():
     try:

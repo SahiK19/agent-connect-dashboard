@@ -10,7 +10,7 @@ const HIDSLogs = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_URL = "http://18.142.200.244:5000/api/wazuh-logs";
+  const API_URL = "/api/hids-logs";
 
   const fetchLogs = async () => {
     try {
