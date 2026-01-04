@@ -188,10 +188,14 @@ export default function InstallAgent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
-              <p className="text-sm mb-3">
-                <strong>GitHub Repository:</strong>
+            <div className="p-4 rounded-lg bg-primary/10 border border-primary/30 space-y-3">
+              <p className="text-sm">
+                <strong>Setup Instructions:</strong>
               </p>
+              <ul className="text-sm space-y-1 ml-4">
+                <li>• Read the README file for complete setup details</li>
+                <li>• For quick installation, go to the last section of the README</li>
+              </ul>
               <a 
                 href="https://github.com/SahiK19/agent-setup" 
                 target="_blank" 
