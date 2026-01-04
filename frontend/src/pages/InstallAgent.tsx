@@ -178,6 +178,32 @@ export default function InstallAgent() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Snort + Correlator Setup */}
+        <Card className="border-primary/30">
+          <CardHeader>
+            <CardTitle>Snort + Correlator Setup</CardTitle>
+            <CardDescription>
+              For complete NIDS monitoring and event correlation, install Snort and the correlator agent.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
+              <p className="text-sm mb-3">
+                <strong>GitHub Repository:</strong>
+              </p>
+              <a 
+                href="https://github.com/SahiK19/agent-setup" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm font-medium"
+              >
+                <Terminal className="w-4 h-4" />
+                View Setup Instructions
+              </a>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
