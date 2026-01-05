@@ -7,7 +7,6 @@ This repository represents the main control plane of the Hybrid Intrusion Detect
 - backend/        → Backend API services
 - frontend/       → Web-based monitoring dashboard
 - terraform/      → AWS infrastructure provisioning
-- correlate_*.py  → Correlation engine logic
 - collect-logs.php→ Log ingestion endpoint
 
 ## Related Repositories
