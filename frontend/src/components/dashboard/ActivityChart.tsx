@@ -34,7 +34,7 @@ export function ActivityChart() {
       const apiData: ApiResponse = await response.json();
       
       const normalizedData: ActivityData[] = [];
-      for (let hour = 0; hour < 24; hour += 4) {
+      for (let hour = 0; hour < 24; hour++) {
         const snortEntry = apiData.snort.find(item => item.hour === hour);
         const wazuhEntry = apiData.wazuh.find(item => item.hour === hour);
         const correlatedEntry = apiData.correlated.find(item => item.hour === hour);

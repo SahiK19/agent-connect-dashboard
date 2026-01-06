@@ -77,7 +77,7 @@ export default function InstallAgent() {
           <CardContent className="space-y-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="package">Package Type</Label>
+                <Label>Package Type</Label>
                 <div className="p-3 rounded-lg bg-secondary/50 border border-border">
                   <span className="text-sm font-medium">DEB (amd64)</span>
                 </div>
